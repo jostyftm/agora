@@ -45,13 +45,40 @@ class AjaxController
 		echo $evaluation->updatePeriod($period, $id_student, $id_asignature, $value);
 	}
 
-	public function getEvaluationSheetAction($db='', $model, $id_asignature, $id_group){
+	public function getEvaluationSheetAction(
+		$db='', 
+		$model, 
+		$maxPeriod, 
+		$id_asignature, 
+		$id_group
+	){
+
 		$performance = new Performance(DB);
+		$evaluation = new Evaluation(DB);
 
 		$ind_DP = $performance->getPerformanceIndicadors(2)['data'];
 		$ind_DS = $performance->getPerformanceIndicadors(3)['data'];
 
-		print_r($ind_DP);
+		$resp = $evaluation->getPeriods(
+					split('_', $maxPeriod)[1],
+					$id_asignature,
+					$id_group
+				)['data'];
+
+		$view = new View(
+			'reportPDF',
+			'evaluationSheet-'.$model.'-render',
+			[
+				'DP'	 =>	$ind_DP,
+				'DS'	 =>	$ind_DS,
+				'periodo'=>	split('_', $maxPeriod)[1],
+				'datos'	 =>	$resp,
+				'info'	 =>	$resp[0],
+				'model'	 =>	$model
+			]
+		);
+
+		$view->execute();
 	}
 }
 ?>

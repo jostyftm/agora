@@ -117,14 +117,16 @@ class PlanillaAsistencia extends FPDF
 		$this->SetFont('Arial','',8);
 
 		foreach ($lista as $clave => $valor) {
-			$this->Cell(89, 4, ($clave+1).' '.utf8_encode($valor['estudiante']), 1,0);
-			$this->Cell(8, 4, '', 1, 0, 'C');
-			$this->Cell(8, 4, $valor['estatus'], 1, 0, 'C');
+			if($valor['estudiante'] != NULL){
+				$this->Cell(89, 4, ($clave+1).' '.utf8_encode($valor['estudiante']), 1,0);
+				$this->Cell(8, 4, '', 1, 0, 'C');
+				$this->Cell(8, 4, $valor['estatus'], 1, 0, 'C');
 
-			for ($i=0; $i < 31; $i++) { 
-				$this->Cell(6, 4, '', 1, 0, 'C');
+				for ($i=0; $i < 31; $i++) { 
+					$this->Cell(6, 4, '', 1, 0, 'C');
+				}
+				$this->Ln(4);
 			}
-			$this->Ln(4);
 		}
 	} 
 }

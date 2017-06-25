@@ -49,5 +49,22 @@ class EvaluationPeriodModel extends DB
 
 			return $this->execute_single_query();
 	}
+
+	public function getPeriods($maxPeriod, $id_asignature, $id_group)
+	{
+		$this->query = "SELECT CONCAT(e.primer_apellido,' ', e.segundo_apellido,' ', e.primer_nombre,' ', e.segundo_nombre) AS estudiante, CONCAT(d.primer_apellido,' ', d.segundo_apellido,' ', d.primer_nombre,' ', d.segundo_apellido) AS director_grupo, g.id_grupo, g.nombre_grupo, a.id_asignatura, a.asignatura, e.novedad, e.estatus";
+
+		for ($i=0; $i < $maxPeriod; $i++) { 
+			$this->query .= ", e.eval_".($i+1)."_per periodo".($i+1)." ";
+		}
+
+		$this->query .= " FROM t_evaluacion e
+						INNER JOIN t_grupos g ON e.id_grupo=g.id_grupo AND g.id_grupo={$id_group}
+						INNER JOIN t_asignaturas a ON e.id_asignatura=a.id_asignatura AND a.id_asignatura={$id_asignature}
+						INNER JOIN docentes d ON g.id_director_grupo=d.id_docente
+						ORDER BY e.primer_apellido";
+
+		return $this->getResultsFromQuery();
+	}
 }
 ?>

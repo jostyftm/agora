@@ -64,13 +64,20 @@
 						<td>1</td>
 						<td>Planilla de asistencia</td>
 						<td>Funcion que genera pdf's de las listas de asistencia por docente</td>
-						<td class=""><span class="label label-warning">En proceso</span></td>
+						<td class=""><span class="label label-danger">Pendiente</span></td>
 						<td><a href="#">Link</a></td>
 					</tr>
 					<tr>
 						<td>2</td>
 						<td>Planilla de superaciones</td>
 						<td>Funcion que genera pdf's de los estudiantes que perdienron uno o varios periodos</td>
+						<td class=""><span class="label label-danger">Pendiente</span></td>
+						<td><a href="#">Link</a></td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>Boletin</td>
+						<td>Funcion que genera pdf's de los boletines estudiantiles de los estudiantes</td>
 						<td class=""><span class="label label-warning">En proceso</span></td>
 						<td><a href="#">Link</a></td>
 					</tr>
@@ -105,8 +112,8 @@
 						<td>2</td>
 						<td>Plantilla Evaluación</td>
 						<td>Funcion que genera pdf de de los modelos de plantilla</td>
-						<td class=""><span class="label label-warning">En Proceso</span></td>
-						<td><a href="#">Link</a></td>
+						<td class=""><span class="label label-success">En Proceso</span></td>
+						<td><a href="/teacher" target="_blank">Link</a></td>
 					</tr>
 					<tr>
 						<td>3</td>
