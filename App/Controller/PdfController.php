@@ -103,6 +103,11 @@ class PdfController
 		if(isset($_POST['btn_p_superacion']))
 		{
 
+			if(!file_exists($path))
+			{	
+				mkdir($path);
+			}
+		
 			foreach ($_POST['students'] as $key => $value) 
 			{
 				$pdf = new GradeBookPDF('P', 'mm', 'A4');
@@ -138,11 +143,6 @@ class PdfController
 		rmdir (str_replace('./', '', $path).'/');
 		rmdir($path);
 		$pdi = new FPDI();
-
-		if(!file_exists($path))
-		{	
-			mkdir($path);
-		}
 
 		$dir = opendir($path);
 		$files = array();

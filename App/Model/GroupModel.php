@@ -20,7 +20,7 @@ class GroupModel extends DB
 	}
 
 	public function getInfo($id_group){
-		$this->query = "SELECT g.id_grupo, g.nombre_grupo, CONCAT(d.primer_apellido,' ', d.segundo_apellido,' ',d.segundo_nombre,' ',d.primer_nombre,' ',d.segundo_nombre) AS director_grupo, j.jornada, s.sede, gra.id_grado
+		$this->query = "SELECT g.id_grupo, g.nombre_grupo, CONCAT(d.primer_apellido,' ', d.segundo_apellido,' ',d.primer_nombre) AS director_grupo, j.jornada, s.sede, gra.id_grado
 						FROM docentes d
 						INNER JOIN t_grupos g ON g.id_director_grupo=d.id_docente AND g.id_grupo={$id_group}
 						INNER JOIN jornadas j on g.jornada=j.id_jornada
