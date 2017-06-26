@@ -1,5 +1,6 @@
 <?php
 	
+	// define('DB', 'agoranet_itigvc');
 	define('DB', 'agoranet_ieag');
 	define("TC", 3);
 	define("pb", '/Public/');

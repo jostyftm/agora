@@ -41,5 +41,14 @@
 
 			return $this->getResultsFromQuery();
 		}
+
+		public function getPeriods()
+		{
+			$this->query = "SELECT *
+							FROM periodos p
+							WHERE p.peso > 0";
+
+			return $this->getResultsFromQuery();
+		}
 	}
 ?>

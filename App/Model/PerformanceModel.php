@@ -35,5 +35,12 @@ class PerformanceModel extends DB
 						
 		return $this->getResultsFromQuery();
 	}
+
+	public function getAll(){
+		$this->query = "SELECT * 
+						FROM desempeno";
+
+		return $this->getResultsFromQuery();
+	}
 }
 ?>

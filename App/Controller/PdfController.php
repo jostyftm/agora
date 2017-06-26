@@ -95,29 +95,34 @@ class PdfController
 		$institution = new Institution(DB);
 		
 		$infoIns = $institution->getInfo()['data'][0];
+		$performances = $performance->getAll()['data'];
+		$periods = $institution->getPeriods()['data'];
+		$valoration = $evaluation->getValoration()['data'];
 		$path = './'.$infoIns['nit'];
 
 		if(isset($_POST['btn_p_superacion']))
 		{
-			if(!file_exists($path))
-			{	
-				mkdir($path);
-			}
 
 			foreach ($_POST['students'] as $key => $value) 
 			{
 				$pdf = new GradeBookPDF('P', 'mm', 'A4');
 				$gradeBook = $evaluation->getGradeBookBySudent($value, $_POST['periodo']);
-				$valoration = $evaluation->getValoration()['data'];
+				
 				$infoGroup = $group->getInfo($_POST['grupo'])['data'][0];
 				$infoStudent = $student->getStudent($value)['data'][0];
 				
+				$pdf->periods = $periods;
 				$pdf->institution = $infoIns;
-				$pdf->infoStudent = $infoStudent;
-				$pdf->infoGroupAndAsig = $infoGroup;
-				$pdf->areas = $gradeBook['areas'];
-				$pdf->gradeBook = $gradeBook['data'];
 				$pdf->valoration = $valoration;
+				$pdf->infoStudent = $infoStudent;
+				$pdf->areas = $gradeBook['areas'];
+				$pdf->infoGroupAndAsig = $infoGroup;
+				$pdf->gradeBook = $gradeBook['data'];
+				$pdf->performancesData = $performances;
+				$pdf->ImpDobleCara = (isset($_POST['debleCara'])) ? true : false;
+				$pdf->Impescala = (isset($_POST['escalaVAlorativa'])) ? true : false;
+				$pdf->AreasDisable = (isset($_POST['areasDisabled'])) ? true : false;
+
 				$pdf->SetMargins(3, 3, 3);
 				$pdf->createGradeBook();
 				$pdf->SetFont('Arial','B',16);
@@ -133,6 +138,11 @@ class PdfController
 		rmdir (str_replace('./', '', $path).'/');
 		rmdir($path);
 		$pdi = new FPDI();
+
+		if(!file_exists($path))
+		{	
+			mkdir($path);
+		}
 
 		$dir = opendir($path);
 		$files = array();
@@ -159,6 +169,8 @@ class PdfController
 
 		ob_clean();
 		$buffer = $pdi->Output('I','merged.pdf');
+
+		sleep(2);
 		system('rm -rf ' . escapeshellarg($path), $retval);
 	}
 }

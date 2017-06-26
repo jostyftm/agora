@@ -95,10 +95,13 @@
 					    			</div>
 					    			<div class="form-group">
 					    				<label class="radio-inline">
-									     	<input type="checkbox" name="areasDisabled" value="true"> Desactivar areas
+									     	<input type="checkbox" name="areasDisabled"> Desactivar Áreas
 									    </label>
 									    <label class="radio-inline">
-									     	<input type="checkbox" name="areasDisabled" value="true"> Impresión doble cara
+									     	<input type="checkbox" name="debleCara"> Doble Cara
+									    </label>
+									    <label class="radio-inline">
+									     	<input type="checkbox" name="escalaVAlorativa"> Escala Valorativa
 									    </label>
 					    			</div>
 					    		</div>

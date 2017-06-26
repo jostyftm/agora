@@ -90,7 +90,7 @@ class EvaluationPeriodModel extends DB
 		}
 
 		$this->query .= "WHERE e.idstudents={$id_student}
-						ORDER BY ar.area";
+						ORDER BY ar.order_area";
 		
 		$data = $this->getResultsFromQuery()['data'];
 
