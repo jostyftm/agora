@@ -23,9 +23,9 @@ class DataBase
     {   
         if($db)
         {
-            $this->user = 'root';
-            $this->password = '';
-            $this->host = 'localhost';
+            $this->user = 'root'; //agoranet
+            $this->password = ''; //Richard_111
+            $this->host = 'localhost'; //104.203.241.156
             $this->database = $db;
 
             $this->openConnect();

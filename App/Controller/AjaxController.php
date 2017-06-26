@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Config\View as View;
+use App\Model\GroupModel as Group;
 use App\Model\PerformanceModel as Performance;
+use App\Model\InstitutionModel as Institution;
 use App\Model\EvaluationPeriodModel as Evaluation;
 /**
 * 
@@ -79,6 +81,28 @@ class AjaxController
 		);
 
 		$view->execute();
+	}
+
+	public function getGroupsAction($id_sede, $db='')
+	{
+		$institution = new Institution(DB);
+
+		$groups = $institution->getGroups($id_sede)['data'];
+
+		foreach ($groups as $key => $value) {
+			echo "<option value='".$value['id_grupo']."'>".utf8_encode($value['nombre_grupo'])."</option>";	
+		}
+	}
+
+	public function getStudentsAction($id_group, $db='')
+	{
+		$group = new Group(DB);
+
+		$students = $group->getClassRoomList($id_group)['data'];
+
+		foreach ($students as $key => $value) {
+			echo "<option value='".$value['idstudents']."'>".utf8_encode($value['estudiante'])."</option>";	
+		}
 	}
 }
 ?>

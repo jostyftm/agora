@@ -3,7 +3,8 @@
 	define('DB', 'agoranet_ieag');
 	define("TC", 3);
 	define("pb", '/Public/');
-
+	setlocale(LC_TIME, 'es_CO.UTF-8');
+	
 	require_once 'vendor/autoload.php';
 
 	if(empty($_GET['url'])){

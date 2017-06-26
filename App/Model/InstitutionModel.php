@@ -19,32 +19,27 @@
 				parent::__construct($db);
 		}
 
-		public function getInfo(){
+		public function getInfo()
+		{
 			$this->query = "SELECT * FROM {$this->table}";
 
-			$this->execute_single_query();
+			return $this->getResultsFromQuery();
+		}
 
-			if($this->isError()){
+		public function getSedes()
+		{
+			$this->query = "SELECT * FROM sedes";
 
-				throw new \Exception("Error ".$this->getErrorMessage());
+			return $this->getResultsFromQuery();
+		}
 
-			}else if($this->results->num_rows > 0){
+		public function getGroups($id_sede)
+		{
+			$this->query = "SELECT g.id_grupo, g.nombre_grupo
+							FROM t_grupos g
+							WHERE g.id_sede = {$id_sede}";
 
-				$this->get_result_query();
-				
-				return array(
-					'message' 	=> 'Consulta exitosa',
-					'state'		=>	true,
-					'data'		=>	$this->rows
-				);
-
-			}else{
-				return array(
-					'message' 	=> 'no hay resultados',
-					'state'		=>	false,
-					'data'		=> array()
-				);
-			}
+			return $this->getResultsFromQuery();
 		}
 	}
 ?>

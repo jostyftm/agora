@@ -26,5 +26,14 @@ class PerformanceModel extends DB
 
 		return $this->getResultsFromQuery();
 	}
+
+	public function getPerformanceToPeriod($id_grade, $id_asignature, $period)
+	{
+		$this->query = "SELECT *
+						FROM desempeno
+						WHERE id_grado={$id_grade} AND id_asignatura={$id_asignature} AND periodos={$period}";
+						
+		return $this->getResultsFromQuery();
+	}
 }
 ?>
