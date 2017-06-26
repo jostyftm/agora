@@ -95,7 +95,7 @@ class PdfController
 		$institution = new Institution(DB);
 		
 		$infoIns = $institution->getInfo()['data'][0];
-		$path = './'.$infoIns['nit'].'/';
+		$path = './'.$infoIns['nit'];
 
 		if(isset($_POST['btn_p_superacion']))
 		{
@@ -121,7 +121,7 @@ class PdfController
 				$pdf->SetMargins(3, 3, 3);
 				$pdf->createGradeBook();
 				$pdf->SetFont('Arial','B',16);
-				$pdf->Output($path.$infoStudent['idstudents'].'boletin.pdf', 'F');
+				$pdf->Output($path.'/'.$infoStudent['idstudents'].'boletin.pdf', 'F');
 			}
 
 			$this->mergePDF($path);
@@ -130,6 +130,8 @@ class PdfController
 
 	private function mergePDF($path)
 	{	
+		rmdir (str_replace('./', '', $path).'/');
+		rmdir($path);
 		$pdi = new FPDI();
 
 		$dir = opendir($path);
@@ -144,7 +146,7 @@ class PdfController
 
 		foreach ($files as $file) 
 		{ 
-			$pageCount = $pdi->setSourceFile($path.$file); 
+			$pageCount = $pdi->setSourceFile($path.'/'.$file); 
 
 			for ($i=1; $i <= $pageCount; $i++) { 
 				
@@ -155,9 +157,9 @@ class PdfController
 			}
 		}
 
-		rmdir($path);
 		ob_clean();
 		$buffer = $pdi->Output('I','merged.pdf');
+		system('rm -rf ' . escapeshellarg($path), $retval);
 	}
 }
 
