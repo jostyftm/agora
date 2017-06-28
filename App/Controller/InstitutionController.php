@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Config\View as View;
+use App\Model\EvaluationPeriodModel as Evaluation;
 use App\Model\InstitutionModel as Institution;
 /**
 * 
@@ -36,7 +37,6 @@ class InstitutionController
 
 		$view->execute();
 	}
-
 }
 
 ?>

@@ -98,24 +98,25 @@ class PdfController
 		$performances = $performance->getAll()['data'];
 		$periods = $institution->getPeriods()['data'];
 		$valoration = $evaluation->getValoration()['data'];
-		$path = './'.$infoIns['nit'];
+		$path = './'.time();
+
 
 		if(isset($_POST['btn_p_superacion']))
 		{
+			$infoGroup = $group->getInfo($_POST['grupo'])['data'][0];
 
 			if(!file_exists($path))
 			{	
 				mkdir($path);
 			}
-		
+			// print_r($evaluation->filterBestResultsByGrade($infoGroup['id_grado']));
 			foreach ($_POST['students'] as $key => $value) 
 			{
 				$pdf = new GradeBookPDF('P', 'mm', 'A4');
-				$gradeBook = $evaluation->getGradeBookBySudent($value, $_POST['periodo']);
+				$gradeBook = $evaluation->getGradeBookBySudent($value, $infoGroup['id_grado'], $_POST['periodo']);
 				
-				$infoGroup = $group->getInfo($_POST['grupo'])['data'][0];
 				$infoStudent = $student->getStudent($value)['data'][0];
-				
+
 				$pdf->periods = $periods;
 				$pdf->institution = $infoIns;
 				$pdf->valoration = $valoration;
@@ -124,11 +125,13 @@ class PdfController
 				$pdf->infoGroupAndAsig = $infoGroup;
 				$pdf->gradeBook = $gradeBook['data'];
 				$pdf->performancesData = $performances;
+				$pdf->calAreas = $gradeBook['calAreas'];
+				$pdf->date = (isset($_POST['fecha']) && $_POST['fecha'] != '') ? date('d-m-Y', strtotime($_POST['fecha'])) : date('d-m-Y');
 				$pdf->ImpDobleCara = (isset($_POST['debleCara'])) ? true : false;
 				$pdf->Impescala = (isset($_POST['escalaVAlorativa'])) ? true : false;
 				$pdf->AreasDisable = (isset($_POST['areasDisabled'])) ? true : false;
 
-				$pdf->SetMargins(3, 3, 3);
+				// // $pdf->SetMargins(5, 5, 5);
 				$pdf->createGradeBook();
 				$pdf->SetFont('Arial','B',16);
 				$pdf->Output($path.'/'.$infoStudent['idstudents'].'boletin.pdf', 'F');
@@ -172,6 +175,13 @@ class PdfController
 
 		sleep(2);
 		system('rm -rf ' . escapeshellarg($path), $retval);
+	}
+
+	public function testPdfAction()
+	{
+		$evaluation = new Evaluation(DB);
+
+		print_r($evaluation->orderBestPerformancesByGroup(0,0));
 	}
 }
 

@@ -70,9 +70,9 @@ class EvaluationPeriodModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
-	public function getGradeBookBySudent($id_student, $periods=array())
+	public function getGradeBookBySudent($id_student, $id_grade, $periods=array())
 	{
-		$this->query = "SELECT e.idstudents, CONCAT(e.primer_apellido,' ',e.segundo_apellido,' ',e.primer_nombre,' ',e.segundo_nombre) AS estudiante, asi.id_asignatura, asi.asignatura, ar.area, ev.ihs";
+		$this->query = "SELECT DISTINCT asi.asignatura, e.idstudents, CONCAT(e.primer_apellido,' ',e.segundo_apellido,' ',e.primer_nombre) AS estudiante, asi.id_asignatura, ar.area, aa.int_horaria AS ihs";
 
 		foreach ($periods as $key => $value) {
 			$this->query .= ", ev.inasistencia_p".($key+1).", p".($key+1).".peso AS periodo_".($key+1)."_peso, ev.".$value." periodo".($key+1)." ";
@@ -81,7 +81,8 @@ class EvaluationPeriodModel extends DB
 		$this->query .= "FROM students e 
 						INNER JOIN t_evaluacion ev ON e.idstudents=ev.id_estudiante 
 						INNER JOIN t_asignaturas asi ON asi.id_asignatura=ev.id_asignatura 
-						INNER JOIN t_area ar ON ar.id_area=ev.id_area";
+						INNER JOIN t_area ar ON ar.id_area=ev.id_area
+						INNER JOIN t_asignatura_x_area aa ON aa.id_asignatura=asi.id_asignatura AND aa.id_area=ar.id_area";
 
 		foreach ($periods as $key => $value) { 
 		
@@ -89,18 +90,22 @@ class EvaluationPeriodModel extends DB
 						INNER JOIN periodos p".($key+1)." ON p".($key+1).".periodos=".($key+1)." ";
 		}
 
-		$this->query .= "WHERE e.idstudents={$id_student}
+		$this->query .= "WHERE e.idstudents={$id_student} AND aa.id_grado = {$id_grade}
 						ORDER BY ar.order_area";
 		
+
+		// return $this->query;
 		$data = $this->getResultsFromQuery()['data'];
 
+		$calculoAreas = $this->filterBestResultsByGrade($id_student, $id_grade)['data'];
 		
 		$areas =  $this->resolveAreas($data);
 
 		return array_merge(
 			array(
 				'data' => $data,
-				'areas'	=> $areas
+				'areas'	=> $areas,
+				'calAreas'	=>	$calculoAreas
 			)
 		);
 	}
@@ -114,11 +119,11 @@ class EvaluationPeriodModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
+	// 
 	// Funciones que no son de consultas SQL
 	private function resolveAreas($data=array())
 	{	
 		$areas = array();
-
 		foreach($data as $key => $value)
 		{
 			if(!$this->esta($areas, utf8_encode($value['area'])))
@@ -126,45 +131,16 @@ class EvaluationPeriodModel extends DB
 				array_push($areas, utf8_encode($value['area']));
 			}
 		}
-
-		// $areasFirst = array();
-		// $areasLast = array();
-		// foreach ($areas as $clave => $valor) {
-		// 	$area = array_shift($areas);
-
-		// 	if(
-		// 		strstr($areas, utf8_encode('AMBIENTAL')) 	||
-		// 		strstr($areas, utf8_encode('SOCIALES'))		||
-		// 		strstr($areas, utf8_encode('CULTURAL'))		||
-		// 		strstr($areas, utf8_encode('ETICA'))		||
-		// 		strstr($areas, utf8_encode('DEPORTES'))		||
-		// 		strstr($areas, utf8_encode('RELIGIOSA'))	||
-		// 		strstr($areas, utf8_encode('HUMANIDADES'))	||
-		// 		strstr($areas, utf8_encode('MATEMÁTICAS'))	||
-		// 		strstr($areas, utf8_encode('INFORMÁTICA'))
-		// 	)
-		// 	{
-		// 		echo $areas." first";
-		// 		// array_push($areasFirst, $area);
-		// 	}else{
-		// 		echo $areas." last";
-		// 		// array_push($areasLast, $area);
-		// 	}
-		// 	echo "<br />";
-		// }
-
+		
 		return $areas;
 	}
 
-	// 
 	private function esta($data=array(), $info)
 	{
-
 		if(empty($data))
 		{
 			return false;
 		}
-
 		foreach ($data as $key => $value) 
 		{
 			
@@ -173,12 +149,51 @@ class EvaluationPeriodModel extends DB
 				return true;
 			}
 		}
-
 		return false;
+	}
+	// 
+	public function filterBestResultsByGrade($id_student, $id_grade)
+	{
+		$this->query = "
+						SELECT 
+t_evaluacion.id_estudiante, t_evaluacion.primer_apellido, t_evaluacion.primer_nombre, t_evaluacion.segundo_nombre, t_evaluacion.id_area,t_evaluacion.id_asignatura
+, t_evaluacion.id_grado, t_evaluacion.id_grupo, t_asignatura_x_area.peso_frente_area as Peso,
+ (SELECT t_area.area FROM t_area WHERE t_area.id_area = t_evaluacion.id_area) as Area
+,IF((t_asignatura_x_area.peso_frente_area > 0)
+, ROUND(SUM(t_evaluacion.eval_1_per * (t_asignatura_x_area.peso_frente_area / 100)),1), 
+ROUND((sum(t_evaluacion.eval_1_per /(SELECT count(DISTINCT t_asignatura_x_area.id_asignatura) FROM t_asignatura_x_area where t_asignatura_x_area.id_area = t_evaluacion.id_area  and t_evaluacion.id_grado = t_asignatura_x_area.id_grado) )),2)) as Valoracion
+FROM t_evaluacion
+INNER JOIN t_asignatura_x_area ON t_asignatura_x_area.id_area  = t_evaluacion.id_area
+and t_asignatura_x_area.id_asignatura = t_evaluacion.id_asignatura AND
+t_evaluacion.id_grado = t_asignatura_x_area.id_grado and t_evaluacion.id_grado = {$id_grade} and t_evaluacion.id_estudiante={$id_student} GROUP BY t_evaluacion.id_estudiante, t_evaluacion.id_area ORDER BY t_evaluacion.primer_apellido, t_evaluacion.primer_nombre DESC;
+		";
 
+		return $this->getResultsFromQuery();
 	}
 
-
-
+	public function orderBestPerformancesByGroup($id_grade='', $id_group='')
+	{
+		$this->query = "
+		SELECT  t_evaluacion.primer_apellido, t_evaluacion.primer_nombre,  
+		sum(t_evaluacion.eval_1_per >= (SELECT minimo from valoracion WHERE valoracion = 'Superior') and t_evaluacion.eval_1_per <=(SELECT maximo from valoracion WHERE valoracion = 'Superior'))   as S ,
+		sum(t_evaluacion.eval_1_per >=  (SELECT minimo from valoracion WHERE valoracion = 'Alto') and t_evaluacion.eval_1_per <= (SELECT maximo from valoracion WHERE valoracion = 'Alto')) as A ,
+		sum(t_evaluacion.eval_1_per >= (SELECT minimo from valoracion WHERE valoracion = 'Basico') and t_evaluacion.eval_1_per <=(SELECT maximo from valoracion WHERE valoracion = 'Basico')) as B , 
+		sum(t_evaluacion.eval_1_per <= (SELECT maximo from valoracion WHERE valoracion = 'Bajo') ) as V ,
+		count(t_evaluacion.eval_1_per>0) as TAV,  
+		ROUND(((SUM(t_evaluacion.eval_1_per)) / count(t_evaluacion.eval_1_per)),1) as Promedio,
+		(SELECT valoracion.val FROM valoracion WHERE 
+		ROUND(((SUM(t_evaluacion.eval_1_per)) / count(t_evaluacion.eval_1_per)),1)
+		BETWEEN   valoracion.minimo AND  valoracion.maximo) as Desempeño
+		FROM t_evaluacion
+		WHERE t_evaluacion.id_estudiante IN
+		(SELECT DISTINCT
+		t_evaluacion.id_estudiante
+		FROM t_evaluacion
+		INNER JOIN t_asignatura_x_area ON t_asignatura_x_area.id_area  = t_evaluacion.id_area
+		and t_asignatura_x_area.id_asignatura = t_evaluacion.id_asignatura 
+		INNER JOIN t_grados ON t_evaluacion.id_grado = t_grados.id_grado and t_grados.id_grado = 15 and t_evaluacion.id_grupo = 19)
+		GROUP BY t_evaluacion.id_estudiante ORDER BY Promedio DESC;	
+		";
+	}
 }
 ?>

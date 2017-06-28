@@ -18,7 +18,7 @@
 					<div class="panel-body">
 						<form action="/pdf/generateGradeBookByStudent" method="POST" enctype="application/x-www-form-urlencoded">
 					    	<div class="row">
-					    		<div class="col-md-4 col-md-offset-2">
+					    		<div class="col-md-4">
 					    			<div class="form-group">
 					    				<label for="">Sedes</label>
 							    		<select name="sede" id="selectSede" class="form-control">
@@ -39,6 +39,12 @@
 							    				
 							    			?>
 							    		</select>
+					    			</div>
+					    		</div>
+					    		<div class="col-md-4">
+					    			<div class="form-group">
+					    				<label for="">Fecha</label>
+					    				<input type="date" class="form-control" name="fecha">
 					    			</div>
 					    		</div>
 					    	</div>
@@ -108,7 +114,7 @@
 					    	</div>
 					    	<div class="form-group text-center">
 					    		<input type="hidden" name="db" value="<?php echo DB;?>">
-					    		<input type="submit" name="btn_p_superacion" class="btn btn-primary" value="Consultar Planilla de Superacion">
+					    		<input type="submit" name="btn_p_superacion" class="btn btn-primary" value="Crear boletin">
 					    	</div>
 					    </form>
 					</div>

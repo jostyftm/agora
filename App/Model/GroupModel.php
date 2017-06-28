@@ -30,7 +30,8 @@ class GroupModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
-	public function getClassRoomList($id_group){
+	public function getClassRoomList($id_group)
+	{
 		$this->query = "SELECT e.idstudents, CONCAT(e.primer_apellido,' ',e.segundo_apellido,' ',e.primer_nombre) AS estudiante, e.estatus 
 						FROM t_estudiante_grupo eg 
 						INNER JOIN students e ON eg.idstudent=e.idstudents AND eg.id_grupo ={$id_group} 

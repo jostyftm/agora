@@ -24,7 +24,7 @@ class StudentModel extends DB
 
 	public function getStudent($id_student)
 	{
-		$this->query = "SELECT e.idstudents, CONCAT	(e.primer_apellido,' ',e.segundo_apellido,' ',e.primer_nombre,' ',e.segundo_nombre) AS estudiante
+		$this->query = "SELECT e.idstudents, e.primer_apellido AS primer_ape_alu, e.segundo_apellido AS segundo_ape_alu, e.primer_nombre AS primer_nom_alu, e.segundo_nombre AS segundo_nom_alu
 						FROM students e
 						WHERE e.idstudents={$id_student}";
 
