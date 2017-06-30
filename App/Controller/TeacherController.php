@@ -62,17 +62,16 @@ class TeacherController
 		$infoGroup = $group->getInfo($id_group)['data'][0];
 		$infoAsignature = $asignature->getInfo($id_asginature)['data'][0];
 
-		// 	loguica para determinar el tipo de modelo de evaluacion y mandar el modelo correspondiente
-		$model = 'm5';
+		// 	logica para determinar el tipo de modelo de evaluacion y mandar el modelo correspondiente
 
 
 		$view = new View(
 			'reportPDF',
-			'formEvaluationSheet-'.$model,
+			'formEvaluationSheet', //.$model,
 			[
 				'asignature'	=> 	$infoAsignature,
 				'group'			=>	$infoGroup,
-				'model'			=> 	$model
+				// 'model'			=> 	$model
 			]
 		);
 

@@ -14,12 +14,16 @@ class PlanillaAsistencia extends FPDF
 	public $institution = array();
 
 	function Header(){
-		$pic = 'data:image/png;base64,'.base64_encode($this->institution["logo_byte"]);
-		$info = getimagesize($pic);
 
-	    // Logo
-	    $this->Image($pic, 6, 4, 20, 20, 'png');
+		if($this->institution['logo_byte'] != NULL)
+		{
+			$pic = 'data:image/png;base64,'.base64_encode($this->institution["logo_byte"]);
+			$info = getimagesize($pic);
+
+		    // Logo
+		    $this->Image($pic, 6, 4, 20, 20, 'png');
 		    
+		 }
 	    // Marca de agua
 
 	    //Marco
@@ -64,7 +68,7 @@ class PlanillaAsistencia extends FPDF
 	    // Título
 	    $this->Cell(120,4, ' DIRECTOR DE GRUPO: '.$this->infoGroupAndAsig['director_grupo'], 0, 0, 'C');
 	    // Movernos a la derecha
-	    $this->Cell(0, 4, 'MES_____________________', 0,0);
+	    $this->Cell(0, 4, 'FECHA: ____________________', 0,0);
 	    // Salto de línea
 	    $this->Ln(4);
 
@@ -118,7 +122,16 @@ class PlanillaAsistencia extends FPDF
 
 		foreach ($lista as $clave => $valor) {
 			if($valor['estudiante'] != NULL){
-				$this->Cell(89, 4, ($clave+1).' '.utf8_encode($valor['estudiante']), 1,0);
+
+				if($clave < 9)
+				{
+					$this->Cell(89, 4, '0'.($clave+1).' '.($valor['estudiante']), 1,0);	
+				}
+				else
+				{
+					$this->Cell(89, 4, ($clave+1).' '.($valor['estudiante']), 1,0);
+				}
+				
 				$this->Cell(8, 4, '', 1, 0, 'C');
 				$this->Cell(8, 4, $valor['estatus'], 1, 0, 'C');
 

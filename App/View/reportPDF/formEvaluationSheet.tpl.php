@@ -5,6 +5,12 @@
 	<link href="<?php echo pb;?>css/bootstrap.css" rel="stylesheet" type="text/css">
    <link href="<?php echo pb;?>css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
    <link href="<?php echo pb;?>css/style.css" rel="stylesheet" type="text/css">
+
+   <style type="text/css">
+      body{
+         font-size: 12px;
+      }
+   </style>
 </head>
 <body>
 <div class="container">
@@ -55,7 +61,7 @@
 
                type: "GET",
                // dataType: "json",
-               url: '/ajax/getEvaluationSheet/<?php echo DB.'/'.$model;?>/'+this.value+'/'+<?php echo $asignature["id_asignatura"]?>+'/'+<?php echo $group["id_grupo"]?>,
+               url: '/ajax/getEvaluationSheet/<?php echo DB;?>/'+this.value+'/'+<?php echo $asignature["id_asignatura"]?>+'/'+<?php echo $group["id_grupo"]?>,
 
                success: function(data){
                   $('#contenedorTabla').empty().append(data);

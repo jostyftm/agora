@@ -52,7 +52,6 @@ class PdfController
 
 	public function evaluationSheetAction(
 		$db='', 
-		$model, 
 		$maxPeriod, 
 		$id_asignature, 
 		$id_group
@@ -63,9 +62,13 @@ class PdfController
 		$institution = new Institution(DB);
 		$pdf = new EvaluationSheetPDF('landscape', 'mm', 'A4');
 
+		// Parametros de evaluacion
+		$evaluation_parameters = $performance->getEvaluationParameters()['data'];
+		$ind_DC = $performance->getPerformanceIndicadors(1)['data'];
 		$ind_DP = $performance->getPerformanceIndicadors(2)['data'];
 		$ind_DS = $performance->getPerformanceIndicadors(3)['data'];
-		
+
+		// Informacion de la institucion, salon de clase y el grupo
 		$infoIns = $institution->getInfo()['data'][0];
 		$infoAsignatureAndGroup = $teacher->getInfoAsignatureAndGroup($id_asignature, $id_group)['data'][0];
 
@@ -75,11 +78,14 @@ class PdfController
 					$id_group
 				)['data'];
 
-		$pdf->model = $model;
+		// print_r($resp);
 		$pdf->maxPeriod = split('_', $maxPeriod)[1];
 		$pdf->institution = $infoIns;
 		$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-		$pdf->SetMargins(3, 3, 3);
+		$pdf->evaluation_parameters = $evaluation_parameters;
+		$pdf->DC = $ind_DC;
+		$pdf->DP = $ind_DP;
+		$pdf->DS = $ind_DS;
 		$pdf->AddPage();
 		$pdf->showData($resp);
 		$pdf->SetFont('Arial','B',16);
@@ -131,7 +137,6 @@ class PdfController
 				$pdf->Impescala = (isset($_POST['escalaVAlorativa'])) ? true : false;
 				$pdf->AreasDisable = (isset($_POST['areasDisabled'])) ? true : false;
 
-				// // $pdf->SetMargins(5, 5, 5);
 				$pdf->createGradeBook();
 				$pdf->SetFont('Arial','B',16);
 				$pdf->Output($path.'/'.$infoStudent['idstudents'].'boletin.pdf', 'F');
@@ -141,7 +146,7 @@ class PdfController
 		}	
 	}
 
-	private function mergePDF($path)
+	private function mergePDF($path, $orientation='p')
 	{	
 		rmdir (str_replace('./', '', $path).'/');
 		rmdir($path);
@@ -164,7 +169,7 @@ class PdfController
 			for ($i=1; $i <= $pageCount; $i++) { 
 				
 				$tpl = $pdi->importPage($i);
-				$pdi->addPage(); 
+				$pdi->addPage($orientation); 
 
 				$pdi->useTemplate($tpl); 
 			}
@@ -179,9 +184,63 @@ class PdfController
 
 	public function testPdfAction()
 	{
-		$evaluation = new Evaluation(DB);
+		if(isset($_POST['btn_p_pe']))
+		{
+			$teacher = new Teacher($_POST['db']);
+			$evaluation = new Evaluation($_POST['db']);
+			$performance = new Performance($_POST['db']);
+			$institution = new Institution($_POST['db']);
+			
+			$path = './'.time();
 
-		print_r($evaluation->orderBestPerformancesByGroup(0,0));
+			$Resp_eP = $performance->getEvaluationParameters()['data'];
+			$evaluation_parameters = array();
+
+			foreach ($Resp_eP as $key => $value) 
+			{
+				array_push($evaluation_parameters, 
+					array(
+						'id_parametro' => $value['id_parametro_evaluacion'],
+						'parametro' => $value['parametro'],
+						'indicadores' => $performance->getPerformanceIndicadors($value['id_parametro_evaluacion'])['data']
+					)
+				);
+			}
+
+			
+
+			// Informacion de la institucion, salon de clase y el grupo
+			$infoIns = $institution->getInfo()['data'][0];
+
+			if(!file_exists($path))
+			{	
+				mkdir($path);
+			}
+
+			foreach ($_POST['grupos'] as $key => $value) 
+			{
+				$pdf = new EvaluationSheetPDF($_POST['opcion']['orientacion'], 'mm', $_POST['opcion']['papel']);
+				// $pdf = new EvaluationSheetPDF('L', 'mm', 'A4');
+				$id_asignature = split('-', $value)[0];
+				$id_group = split('-', $value)[1];
+			
+				$infoAsignatureAndGroup = $teacher->getInfoAsignatureAndGroup($id_asignature, $id_group)['data'][0];
+
+				$resp = $evaluation->getPeriods(
+							split('_', $_POST['periodo'])[1],
+							$id_asignature,
+							$id_group
+						)['data'];
+				$pdf->maxPeriod = split('_', $_POST['periodo'])[1];
+				$pdf->evaluation_parameters = $evaluation_parameters;
+				$pdf->institution = $infoIns;
+				$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
+				$pdf->AddPage();
+				$pdf->showData($resp);
+				$pdf->Output($path.'/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'F');
+			}
+			$this->mergePDF($path, $_POST['opcion']['orientacion']);
+		}
 	}
 }
 

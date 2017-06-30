@@ -37,6 +37,25 @@ class InstitutionController
 
 		$view->execute();
 	}
+
+	public function showFormEvaluationSheetAction($db)
+	{
+		$institution = new Institution($db);
+
+		$sedes = $institution->getSedes()['data'];
+
+		$view = new View(
+			'institution',
+			'formEvaluationSheet',
+			[
+				'db' 	=>	$db,
+				'sedes'	=>	$sedes
+			]
+		);
+
+		$view->execute();
+	}
+	
 }
 
 ?>

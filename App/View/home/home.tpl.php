@@ -75,6 +75,13 @@
 						<td><a href="#">Link</a></td>
 					</tr>
 					<tr>
+						<td>3</td>
+						<td>Planilla de Evaluación</td>
+						<td>Funcion que genera pdf's de la planilla de evaluación</td>
+						<td class=""><span class="label label-success">Terminado</span></td>
+						<td><a href="/institution/showFormEvaluationSheet/<?php echo DB;?>" target="_blank">Link</a></td>
+					</tr>
+					<tr>
 						<td>2</td>
 						<td>Boletin</td>
 						<td>Funcion que genera pdf's de los boletines estudiantiles de los estudiantes</td>

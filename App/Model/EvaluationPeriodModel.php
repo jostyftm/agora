@@ -55,7 +55,7 @@ class EvaluationPeriodModel extends DB
 
 	public function getPeriods($maxPeriod, $id_asignature, $id_group)
 	{
-		$this->query = "SELECT CONCAT(e.primer_apellido,' ', e.segundo_apellido,' ', e.primer_nombre,' ', e.segundo_nombre) AS estudiante, CONCAT(d.primer_apellido,' ', d.segundo_apellido,' ', d.primer_nombre,' ', d.segundo_apellido) AS director_grupo, g.id_grupo, g.nombre_grupo, a.id_asignatura, a.asignatura, e.novedad, e.estatus";
+		$this->query = "SELECT e.primer_apellido AS alu_primer_ape, e.segundo_apellido AS alu_segundo_ape, e.primer_nombre AS alu_primer_nom, e.segundo_nombre AS alu_segundo_nom, d.primer_apellido AS dir_primer_ape, d.segundo_apellido AS dir_segundo_ape, d.primer_nombre AS dir_primer_nom, d.segundo_apellido AS dir_segundo_nom, g.id_grupo, g.nombre_grupo, a.id_asignatura, a.asignatura, e.novedad, e.estatus";
 
 		for ($i=0; $i < $maxPeriod; $i++) { 
 			$this->query .= ", e.eval_".($i+1)."_per periodo".($i+1)." ";

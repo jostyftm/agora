@@ -27,6 +27,14 @@ class PerformanceModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
+
+	public function getEvaluationParameters()
+	{
+		$this->query = "SELECT * FROM new_parametro_evaluacion";
+
+		return $this->getResultsFromQuery();
+	}
+
 	public function getPerformanceToPeriod($id_grade, $id_asignature, $period)
 	{
 		$this->query = "SELECT *

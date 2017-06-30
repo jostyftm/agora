@@ -1,9 +1,10 @@
 <?php
 	
-	define('DB', 'agoranet_itigvc');
+	// define('DB', 'agoranet_itigvc');
 	// define('DB', 'agoranet_diocesano');
-	// define('DB', 'agoranet_ieag');
-	define("TC", 3);
+	define('DB', 'agoranet_ieag');
+	// define('DB', 'agoranet_jjrondon');
+	define("TC", 23);
 	define("pb", '/Public/');
 	setlocale(LC_TIME, 'es_CO.UTF-8');
 	
