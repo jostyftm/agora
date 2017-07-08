@@ -26,9 +26,9 @@ class TeacherController
 
 		$view = new View(
 			'teacher',
-			'home',
+			'index',
 			[
-				'asginatures'	=>	$asginatures
+				'include'	=>	'partials/home.tpl.php'
 			]
 		);
 

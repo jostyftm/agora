@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Planilla</title>
+	<title>Boletin</title>
 	<link href="<?php echo pb;?>css/bootstrap.css" rel="stylesheet" type="text/css">
 	<link href="<?php echo pb;?>css/font-awesome.min.css" rel="stylesheet" type="text/css">
 	<link href="<?php echo pb;?>css/style.css" rel="stylesheet" type="text/css">
@@ -76,7 +76,7 @@
 					    	</div>
 					    	</div>
 					    	<div class="row">
-					    		<div class="col-md-6">
+					    		<div class="col-md-12 text-center">
 					    			<div class="form-group text-center">
 					    				<label for="">Periodo</label>
 					    			</div>
@@ -95,19 +95,31 @@
 									    </label>
 					    			</div>
 					    		</div>
-					    		<div class="col-md-6">
+					    	</div>
+					    	<hr>
+					    	<div class="row">
+					    		<div class="col-md-12 text-center">
 					    			<div class="form-group text-center">
-					    				<label for="">Opciones</label>
+					    				<label for="">Configuración del boletin</label>
 					    			</div>
 					    			<div class="form-group">
-					    				<label class="radio-inline">
-									     	<input type="checkbox" name="areasDisabled"> Desactivar Áreas
+									    <label class="radio-inline">
+									    	<input type="checkbox" name="MosDoc" value="MosDoc"> Mostrar Docente
+									    </label>
+										<label class="radio-inline">
+									     	<input type="checkbox" name="escalaVAlorativa"> Escala Valorativa
+									    </label>
+									    <label class="radio-inline">
+									     	<input type="checkbox" name="MosDesem"> Mostra Desempeños
+									    </label>
+									    <label class="radio-inline">
+									     	<input type="checkbox" name="areasDisabled"> Desactivar Areas
 									    </label>
 									    <label class="radio-inline">
 									     	<input type="checkbox" name="debleCara"> Doble Cara
 									    </label>
 									    <label class="radio-inline">
-									     	<input type="checkbox" name="escalaVAlorativa"> Escala Valorativa
+									     	<input type="checkbox" name="reportDisable"> Informe general del periodo
 									    </label>
 					    			</div>
 					    		</div>

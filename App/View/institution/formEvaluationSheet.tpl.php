@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Planilla</title>
+	<title>Planilla de evaluacion</title>
 	<link href="<?php echo pb;?>css/bootstrap.css" rel="stylesheet" type="text/css">
 	<link href="<?php echo pb;?>css/font-awesome.min.css" rel="stylesheet" type="text/css">
 	<link href="<?php echo pb;?>css/style.css" rel="stylesheet" type="text/css">

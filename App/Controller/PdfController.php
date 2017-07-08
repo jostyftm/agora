@@ -9,9 +9,11 @@ use App\Model\StudentModel as Student;
 use App\Model\InstitutionModel as Institution;
 use App\Model\PerformanceModel as Performance;
 use App\ModelPDF\GradeBookPDF	as GradeBookPDF;
+use App\Model\ReportPeriodModel as ReportPeriod; //Cambio
 use App\Model\EvaluationPeriodModel as Evaluation;
 use App\ModelPDF\PlanillaAsistencia as PlanillaAsistencia;
 use App\ModelPDF\EvaluationSheetPDF as EvaluationSheetPDF;
+use App\ModelPDF\GeneralPeriodReportPDF as GeneralPeriodReportPDF; //Cambio
 /**
 * 
 */
@@ -64,9 +66,9 @@ class PdfController
 
 		// Parametros de evaluacion
 		$evaluation_parameters = $performance->getEvaluationParameters()['data'];
-		$ind_DC = $performance->getPerformanceIndicadors(1)['data'];
-		$ind_DP = $performance->getPerformanceIndicadors(2)['data'];
-		$ind_DS = $performance->getPerformanceIndicadors(3)['data'];
+		$ind_DC = $performance->getPerformanceIndicators(1)['data'];
+		$ind_DP = $performance->getPerformanceIndicators(2)['data'];
+		$ind_DS = $performance->getPerformanceIndicators(3)['data'];
 
 		// Informacion de la institucion, salon de clase y el grupo
 		$infoIns = $institution->getInfo()['data'][0];
@@ -92,16 +94,30 @@ class PdfController
 		$pdf->Output('pdf/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'I');
 	}
 
+	// Cambio
+	private function generateGeneralPeriodReport($content, $path, $student=array(), $institution=array(), $group=array())
+	{
+
+		$pdf = new GeneralPeriodReportPDF('P', 'mm', 'A4');
+		$pdf->institution = $institution;
+		$pdf->infoStudent = $student;
+		$pdf->infoGroupAndAsig = $group;
+		$pdf->content = (empty($content)) ? 'No hay reporte' : $content;
+		$pdf->date = (isset($_POST['fecha']) && $_POST['fecha'] != '') ? date('d-m-Y', strtotime($_POST['fecha'])) : date('d-m-Y');
+		$pdf->createReportGeneralPeriod();
+		$pdf->Output($path.'informe.pdf', 'F');
+	}
+
 	public function generateGradeBookByStudentAction()
 	{	
 		$group = new Group(DB);
 		$student = new Student(DB);
+		$report = new ReportPeriod(DB);
 		$evaluation = new Evaluation(DB);
 		$performance = new Performance(DB);
 		$institution = new Institution(DB);
 		
 		$infoIns = $institution->getInfo()['data'][0];
-		$performances = $performance->getAll()['data'];
 		$periods = $institution->getPeriods()['data'];
 		$valoration = $evaluation->getValoration()['data'];
 		$path = './'.time();
@@ -110,36 +126,62 @@ class PdfController
 		if(isset($_POST['btn_p_superacion']))
 		{
 			$infoGroup = $group->getInfo($_POST['grupo'])['data'][0];
+			$performances = $performance->getPerformanceByGroup($infoGroup['id_grupo'], 1)['data'];
 
 			if(!file_exists($path))
 			{	
 				mkdir($path);
 			}
-			// print_r($evaluation->filterBestResultsByGrade($infoGroup['id_grado']));
+
 			foreach ($_POST['students'] as $key => $value) 
 			{
-				$pdf = new GradeBookPDF('P', 'mm', 'A4');
-				$gradeBook = $evaluation->getGradeBookBySudent($value, $infoGroup['id_grado'], $_POST['periodo']);
-				
 				$infoStudent = $student->getStudent($value)['data'][0];
+				$fileName = substr($infoStudent['primer_ape_alu'], 0,2).
+							substr($infoStudent['segundo_ape_alu'], 0,2).
+							substr($infoStudent['primer_nom_alu'], 0,2).
+							substr($infoStudent['segundo_nom_alu'], 0,2).
+							$infoStudent['idstudents'];
 
-				$pdf->periods = $periods;
-				$pdf->institution = $infoIns;
-				$pdf->valoration = $valoration;
-				$pdf->infoStudent = $infoStudent;
-				$pdf->areas = $gradeBook['areas'];
-				$pdf->infoGroupAndAsig = $infoGroup;
-				$pdf->gradeBook = $gradeBook['data'];
-				$pdf->performancesData = $performances;
-				$pdf->calAreas = $gradeBook['calAreas'];
-				$pdf->date = (isset($_POST['fecha']) && $_POST['fecha'] != '') ? date('d-m-Y', strtotime($_POST['fecha'])) : date('d-m-Y');
-				$pdf->ImpDobleCara = (isset($_POST['debleCara'])) ? true : false;
-				$pdf->Impescala = (isset($_POST['escalaVAlorativa'])) ? true : false;
-				$pdf->AreasDisable = (isset($_POST['areasDisabled'])) ? true : false;
+				if(isset($_POST['reportDisable']) && $infoGroup['id_grado'] == 4){
+					$reportData = $report->getReportPeriodByStudent($infoStudent['idstudents'], 1);
 
-				$pdf->createGradeBook();
-				$pdf->SetFont('Arial','B',16);
-				$pdf->Output($path.'/'.$infoStudent['idstudents'].'boletin.pdf', 'F');
+					if($reportData['state'])
+					{
+						$content = $reportData['data'][0]['observaciones'];
+						
+						$ruta = $path."/".$fileName;
+						$this->generateGeneralPeriodReport($content, $ruta, $infoStudent,$infoIns, $infoGroup);
+					}
+				}
+				
+				$gradeBook = $evaluation->getGradeBookBySudent($value, $infoGroup['id_grado'], $_POST['periodo']);
+
+				if($evaluation->decideGradeBook($gradeBook, 1))
+				{	
+					$pdf = new GradeBookPDF('P', 'mm', 'A4');
+					$pdf->periods = $periods;
+
+					$pdf->institution = $infoIns;
+					$pdf->valoration = $valoration;
+					$pdf->infoStudent = $infoStudent;
+					$pdf->areas = $gradeBook['areas'];
+					$pdf->infoGroupAndAsig = $infoGroup;
+					$pdf->gradeBook = $gradeBook['data'];
+					$pdf->performancesData = $performances;
+					$pdf->calAreas = $gradeBook['calAreas'];
+					$pdf->date = (isset($_POST['fecha']) && $_POST['fecha'] != '') ? date('d-m-Y', strtotime($_POST['fecha'])) : date('d-m-Y');
+
+					$pdf->ImpDobleCara = (isset($_POST['debleCara'])) ? true : false;
+					$pdf->Impescala = (isset($_POST['escalaVAlorativa'])) ? true : false;
+					$pdf->AreasDisable = (isset($_POST['areasDisabled'])) ? true : false;
+					$pdf->DesemDisable = (isset($_POST['MosDesem'])) ? true : false;
+					$pdf->DoceDisabled = (isset($_POST['MosDoc'])) ? true : false;
+
+					$pdf->createGradeBook();
+					$pdf->SetFont('Arial','B',16);
+					$pdf->Output($path.'/'.$fileName.'boletin.pdf', 'F');
+				}
+				
 			}
 
 			$this->mergePDF($path);
@@ -148,8 +190,6 @@ class PdfController
 
 	private function mergePDF($path, $orientation='p')
 	{	
-		rmdir (str_replace('./', '', $path).'/');
-		rmdir($path);
 		$pdi = new FPDI();
 
 		$dir = opendir($path);
@@ -178,7 +218,6 @@ class PdfController
 		ob_clean();
 		$buffer = $pdi->Output('I','merged.pdf');
 
-		sleep(2);
 		system('rm -rf ' . escapeshellarg($path), $retval);
 	}
 
@@ -202,12 +241,10 @@ class PdfController
 					array(
 						'id_parametro' => $value['id_parametro_evaluacion'],
 						'parametro' => $value['parametro'],
-						'indicadores' => $performance->getPerformanceIndicadors($value['id_parametro_evaluacion'])['data']
+						'indicadores' => $performance->getPerformanceIndicators($value['id_parametro_evaluacion'])['data']
 					)
 				);
 			}
-
-			
 
 			// Informacion de la institucion, salon de clase y el grupo
 			$infoIns = $institution->getInfo()['data'][0];

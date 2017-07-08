@@ -18,7 +18,7 @@ class PerformanceModel extends DB
 			parent::__construct($db);
 	}
 
-	public function getPerformanceIndicadors($id_performance)
+	public function getPerformanceIndicators($id_performance)
 	{
 		$this->query = "SELECT *
 						FROM new_indicadores_desempeno
@@ -44,9 +44,20 @@ class PerformanceModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
-	public function getAll(){
+	public function getAll()
+	{
 		$this->query = "SELECT * 
 						FROM desempeno";
+
+		return $this->getResultsFromQuery();
+	}
+
+	public function getPerformanceByGroup($id_group, $period)
+	{
+		$this->query = "SELECT dp.posicion, dp.id_grupo, d.*
+						FROM rel_desemp_posicion dp
+						INNER JOIN desempeno d ON dp.cod_desemp=d.codigo
+						WHERE dp.id_grupo={$id_group} AND d.periodos ={$period}";
 
 		return $this->getResultsFromQuery();
 	}

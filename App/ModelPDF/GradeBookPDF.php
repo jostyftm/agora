@@ -23,20 +23,28 @@ class GradeBookPDF extends FPDF
 	public $institution = array();
 	public $performancesData = array();
 	public $infoGroupAndAsig = array();
+	public $performanceIndicators = array();
+
+	private $_prefixValoration = 'valoracion';
 
 	public $Impescala = false;
 	public $ImpDobleCara = false;
 	public $AreasDisable = false;
+	public $DesemDisable = false;
+	public $DoceDisabled = false;
 
 	private $_h_c = 4;
 
 
 	function Header(){
-		$pic = 'data:image/png;base64,'.base64_encode($this->institution["logo_byte"]);
-		$info = getimagesize($pic);
+		if($this->institution['logo_byte'] != NULL)
+		{
+			$pic = 'data:image/png;base64,'.base64_encode($this->institution["logo_byte"]);
+			$info = getimagesize($pic);
 
-	    // Logo
-	    $this->Image($pic, 12, 14, 15, 15, 'png');
+		    // Logo
+		    $this->Image($pic, 12, 14, 15, 15, 'png');
+		}
 		    
 	    // Marca de agua
 
@@ -76,10 +84,13 @@ class GradeBookPDF extends FPDF
 	    $this->Cell(17, 4, '', 0,0);
 	    $this->Cell(90, 4, 'GRUPO: '.$this->infoGroupAndAsig['nombre_grupo'], 0, 0, 'L');
 	    
-	    // Título
-	    $this->Cell(0,4, 'DIR. DE GRUPO: '.$this->infoGroupAndAsig['director_grupo'], 0, 0, 'L');
-	    // Movernos a la derecha
-	    // $this->Cell(0, 4, 'MES_____________________', 0,0);
+	    // DIRECTOR DE GRUPO
+	     $this->Cell(0,4, 'DIR. DE GRUPO: '.
+	    	$this->infoGroupAndAsig['doc_primer_nomb']." ".
+	    	$this->infoGroupAndAsig['doc_segundo_nomb']." ".
+	    	$this->infoGroupAndAsig['doc_primer_ape']." ".
+	    	$this->infoGroupAndAsig['doc_segundo_ape'], 0, 0, 'L');
+
 	    // Salto de línea
 	    $this->Ln(4);
 
@@ -112,8 +123,12 @@ class GradeBookPDF extends FPDF
 
 	// 
 	public function createGradeBook(){
+		
+		// 
+		$this->config();
 		// 
 		$this->AddPage();	
+		// 
 		$this->createDetailBook();
 		// 
 		$this->Cell(0, $this->_h_c, '', 'T',0, 'C');
@@ -121,22 +136,27 @@ class GradeBookPDF extends FPDF
 		// Creamos la tabla con las notas
 		$this->createTableDetail();
 
-		// LastConfgi
+		// LastConfig
 		$this->LastConfig();
 
 		// 
 		$this->createGeneralObservation();
-
 	}
 
+	private function config()
+	{
+		if($this->infoGroupAndAsig['id_grado'] == 4)
+			$this->_prefixValoration = 'valoracion_trans';
+	}
 	private function createDetailBook()
 	{
-		$performance = new Performance(DB);
 
-		foreach ($this->areas as $key => $value) {
+		// Recorremos las areas
+		foreach ($this->areas as $key => $value) 
+		{
 
 			$nArea = '';
-
+			$valoracionA = 0;
 			foreach ($this->calAreas as $keyCal => $valueCal) {
 				if(utf8_encode($valueCal['Area']) == $value)
 				{	
@@ -144,91 +164,166 @@ class GradeBookPDF extends FPDF
 				}
 			}
 
-			if($nArea > 0){
+			if($nArea > 0)
+			{
 				$this->SetFillColor(230,230,230);
 				$this->SetFont('Arial','B',8);
-				$this->Cell(150, $this->_h_c, utf8_decode($value), 'TBL',0, 'L', true);
 				
+				if(!$this->AreasDisable){
+					$this->Cell(150, $this->_h_c, utf8_decode($value), 'TBL',0, 'L', true);
+					if(strlen($nArea) > 1)
+					{
+						$this->Cell(17, $this->_h_c, $nArea, 'TB',0, 'C', true);
+					}else{
+						$this->Cell(17, $this->_h_c, $nArea.'.0', 'TB',0, 'C', true);
+					}
 
-				if(strlen($nArea) > 1)
-				{
-					$this->Cell(17, $this->_h_c, $nArea, 'TB',0, 'C', true);
+					// Funcion para obtener la valoracion
+					$valoracionA = $this->getPrefixValoration($nArea);
+							
+					$this->Cell(0, $this->_h_c, $valoracionA, 'TBR', 0, 'C', true);
 				}else{
-					$this->Cell(17, $this->_h_c, $nArea.'.0', 'TB',0, 'C', true);
+					$this->Cell(0, $this->_h_c, utf8_decode($value), 1,0, 'L', true);
 				}
-
-				foreach ($this->valoration as $key2 => $value3) 
-				{			
-					if(
-						$nArea >= $value3['minimo'] &&
-						$nArea <= $value3['maximo']
-					)
-					{
-						$valoracionA = $value3['valoracion'];
-					}
-					else if($nArea == NULL || $nArea == 0)
-					{
-						$valoracionA = 'Bajo';
-					}
-				}
-						
-				$this->Cell(0, $this->_h_c, $valoracionA, 'TBR', 0, 'C', true);
 
 				$this->Ln($this->_h_c);
 
-				foreach ($this->gradeBook as $key => $value2) {
+				// Recorremos las asignaturas
+				foreach ($this->gradeBook as $key => $value2) 
+				{
 				
 					if(utf8_decode($value) == $value2['area'])
 					{
-						$nota = round($value2['periodo1'],1);
+						$nota = round($value2['eval_1_per'],1);
 						$valoracion = '';
+						$prefixValoracion = '';
 						
-						$this->SetFont('Arial','B',8);
-						$this->Cell(140, $this->_h_c, $value2['asignatura'], 'L',0, 'L');
-						$this->Cell(10, $this->_h_c, $value2['ihs'], 0,0, 'C');
+						// Verificamos si la nota esta en 0
+						if($nota > 0): 
+							$this->SetFont('Arial','B',8);
+							$this->Cell(140, $this->_h_c, $value2['asignatura'], 'L',0, 'L');
+							$this->Cell(10, $this->_h_c, $value2['ihs'], 0,0, 'C');
 
-						if(strlen($nota) > 1)
-							$this->Cell(17, $this->_h_c, $nota, 0,0, 'C');
-						else
-							$this->Cell(17, $this->_h_c, $nota.'.0', 0,0, 'C');
+							if(strlen($nota) > 1)
+								$this->Cell(17, $this->_h_c, $nota, 0,0, 'C');
+							else
+								$this->Cell(17, $this->_h_c, $nota.'.0', 0,0, 'C');
 
-						foreach ($this->valoration as $key2 => $value3) {
+							// Funcion para obtener la valoracion
+							$prefixValoracion = $this->getPrefixValoration($nota);
+							// Valoracion para mostrar los desempeños
+							$valoracion = $this->getValoration($nota);
+							// 
+							$this->Cell(0, $this->_h_c, $prefixValoracion, 'R', 0, 'C');
 							
-							if(
-								$nota >= $value3['minimo'] &&
-								$nota <= $value3['maximo']
-							)
-							{
-								$valoracion = $value3['valoracion'];
-							}
-							else if($nota == NULL || $nota == 0)
-							{
-								$valoracion = 'Bajo';
-							}
-						}
 
-						$this->Cell(0, $this->_h_c, $valoracion, 'R', 0, 'C');
+							$this->Ln($this->_h_c);
 
-						$this->Ln($this->_h_c);
+							// Desempeño por los indicadores
+							$this->SetFont('Arial','',8);
+							if($this->DesemDisable)
+								$this->showPerformancesByIndicators($value2);
+							else
+								$this->showPerformancesByAsignature($value2, $valoracion);
 
-						foreach ($this->performancesData as $keyD => $valueD) 
-						{
-							if(
-								$this->infoGroupAndAsig['id_grado'] == $valueD['id_grado'] &&
-								$value2['id_asignatura'] == $valueD['id_asignatura'] && $valueD['periodos'] == 1
-							)
-							{
-								$this->SetFont('Arial','',8);
-								if(strtolower($valoracion) == 'superior')
-									$this->determineHeihtCell($valueD['superior'], 'LR');
-								else
-									if($valoracion != '')
-										$this->determineHeihtCell($valueD[strtolower($valoracion)], 'LR');
-							}
-						}
+							// Preguntamos si la opcion para mostrar al docente est habilitada
+							if($this->DoceDisabled)
+								$this->showTeacher($value2);
+
+						endif;
 					}
 				}
 			}
+		}
+	}
+
+	private function getPrefixValoration($note)
+	{
+		$valoration = '';
+		foreach ($this->valoration as $key2 => $value3) 
+		{
+								
+			if($note >= $value3['minimo'] && $note <= $value3['maximo'])
+				$valoration = $value3[$this->_prefixValoration];
+			
+			else if($note == NULL || $note == 0)
+					$valoration = 'Bajo';
+		}
+
+		return $valoration;
+	}
+
+	private function getValoration($note)
+	{
+		$valoration = '';
+		foreach ($this->valoration as $key2 => $value3) 
+		{
+								
+			if($note >= $value3['minimo'] && $note <= $value3['maximo'])
+				$valoration = $value3['valoracion'];
+			
+			else if($note == NULL || $note == 0)
+					$valoration = 'Bajo';
+		}
+
+		return $valoration;
+	}
+
+	private function showTeacher($data=array())
+	{	
+		$this->SetFont('Arial','B',8);
+		$this->Cell(0, $this->_h_c,'DOCENTE: '. 
+			$data['doc_primer_nomb']." ".
+			$data['doc_segundo_nomb']." ".
+			$data['doc_primer_ape']." ".
+			$data['doc_segundo_ape'], 'LR',0,'R');
+
+		$this->Ln($this->_h_c);
+	}
+	private function showPerformancesByAsignature($data_asignature=array(), $valoration)
+	{
+		foreach ($this->performancesData as $keyD => $valueD) 
+		{
+			if(
+				$this->infoGroupAndAsig['id_grado'] == $valueD['id_grado'] &&
+				$data_asignature['id_asignatura'] == $valueD['id_asignatura'] && $valueD['periodos'] == 1
+			):
+			
+				if(strtolower($valoration) == 'superior')
+					$this->determineHeihtCell($valueD['superior'], 'LR');
+				else
+					if($valoration != '')
+						$this->determineHeihtCell($valueD[strtolower($valoration)], 'LR');
+			endif;
+		}
+	}
+	private function showPerformancesByIndicators($data_asignature=array())
+	{
+		foreach ($this->performancesData as $keyP => $valueP) {
+						
+			$notaDesem = 0;
+			$valoracion = '';
+
+			if($data_asignature['id_asignatura'] == $valueP['id_asignatura']):
+				$notaDesem = $data_asignature[$valueP['posicion']];
+
+				foreach ($this->valoration as $keyV => $valueV) {
+								
+					if(
+						$notaDesem >= $valueV['minimo'] &&
+						$notaDesem <= $valueV['maximo']	
+					):
+						$valoracion = $valueV['valoracion'];
+					endif;
+				}
+
+									
+				if(strtolower($valoracion) == 'superior')
+					$this->determineHeihtCell($valueP['superior'], 'LR');
+				else
+					if($valoracion != '')
+						$this->determineHeihtCell($valueP[strtolower($valoracion)], 'LR');
+			endif;
 		}
 	}
 
@@ -249,7 +344,6 @@ class GradeBookPDF extends FPDF
 
 		$this->SetFont('Arial','B',8);
 
-		// $this->Cell(10, $this->_h_c, '', 0, 0, '');
 		$this->Cell( (102 + (22 * count($this->periods)) ), $this->_h_c, utf8_decode('VALORACIONES ACUMULADAS DURANTE EL AÑO LECTIVO'), 1, 0, 'C');
 
 		$this->Ln($this->_h_c);
@@ -260,7 +354,6 @@ class GradeBookPDF extends FPDF
 
 		foreach ($this->periods as $key => $value) 
 		{	
-
 			if($value['peso'] != 0)
 			{
 				$this->Cell(6, $this->_h_c, 'Fa', 1,0, 'C');
@@ -273,7 +366,7 @@ class GradeBookPDF extends FPDF
 
 		$this->Ln($this->_h_c);
 
-		// $this->Cell(10, $this->_h_c, '', 0, 0, '');
+		
 		$this->Cell(90, $this->_h_c, '', 1,0, 'C');
 		$this->Cell(6, $this->_h_c, '', 1,0, 'C');
 		$this->Cell(6, $this->_h_c, '', 1,0, 'C');
@@ -322,8 +415,10 @@ class GradeBookPDF extends FPDF
 				if(strlen($nArea) > 1)
 				{
 					$this->Cell(8, $this->_h_c, $nArea, 'TBR',0, 'C', true);
+					$this->Cell(8, $this->_h_c, '', 'TBR',0, 'C', true);
 				}else{
 					$this->Cell(8, $this->_h_c, $nArea.'.0', 'TBR',0, 'C', true);
+					$this->Cell(8, $this->_h_c, '', 'TBR',0, 'C', true);
 				}
 
 				$this->Ln($this->_h_c);
@@ -334,80 +429,43 @@ class GradeBookPDF extends FPDF
 					
 					if(utf8_decode($value) == $valueG['area'])
 					{
-						$nota = round($valueG['periodo1'],1);
+						$nota = round($valueG['eval_1_per'],1);
 						$faltas = ($valueG['inasistencia_p1'] > 0) ? $valueG['inasistencia_p1'] : '';
-						// 
-						$this->SetFont('Arial','',8);
-						// $this->Cell(10, $this->_h_c, '', 0, 0, '');
-						$this->Cell(90, $this->_h_c, substr($valueG['asignatura'], 0, 50), 1,0, 'L');
-						$this->Cell(6, $this->_h_c, $valueG['ihs'], 1,0, 'C');
+						// Cambio
+						if($nota > 0):
+							$this->SetFont('Arial','',8);
+							// $this->Cell(10, $this->_h_c, '', 0, 0, '');
+							$this->Cell(90, $this->_h_c, substr($valueG['asignatura'], 0, 50), 1,0, 'L');
+							$this->Cell(6, $this->_h_c, $valueG['ihs'], 1,0, 'C');
 
-						$this->Cell(6, $this->_h_c, $faltas, 1,0, 'C');
+							$this->Cell(6, $this->_h_c, $faltas, 1,0, 'C');
 
-						if(strlen($nota) > 1)
-							$this->Cell(8, $this->_h_c, $nota, 1,0, 'C');
-						else
-							$this->Cell(8, $this->_h_c, $nota.'.0', 1,0, 'C');
+							if(strlen($nota) > 1)
+								$this->Cell(8, $this->_h_c, $nota, 1,0, 'C');
+							else
+								$this->Cell(8, $this->_h_c, $nota.'.0', 1,0, 'C');
 
-						$this->Cell(8, $this->_h_c, '', 1,0, 'C');
-						$this->Cell(6, $this->_h_c, '', 'TRB', 0,'C');
+							$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+							$this->Cell(6, $this->_h_c, '', 'TRB', 0,'C');
 
-						// Estatico
-						// $cont = 0;
-						foreach ($this->periods as $keyP => $valueP) 
-						{
-							if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
-							{	
-								$this->Cell(8, $this->_h_c, '', 1,0, 'C');
-								$this->Cell(8, $this->_h_c, '', 1,0, 'C');
-								$this->Cell(6, $this->_h_c, '', 1,0, 'C');
+							// Estatico
+							// $cont = 0;
+							foreach ($this->periods as $keyP => $valueP) 
+							{
+								if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
+								{	
+									$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+									$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+									$this->Cell(6, $this->_h_c, '', 1,0, 'C');
+								}
 							}
-						}
 
-						$this->Ln($this->_h_c);
+							$this->Ln($this->_h_c);
+						endif;
 					}
 				}
 			}
 		}
-
-		// // $this->Cell(10, $this->_h_c, '', 0, 0, '');
-		// $this->Cell(90, $this->_h_c, 'PROMEDIO GENERAL:', 1,0,'');
-		// $this->Cell(6, $this->_h_c, '', 'BT',0, 'C');
-		// $this->Cell(6, $this->_h_c, '', 'BT', 0,'C');
-		// foreach ($this->periods as $keyP => $valueP) 
-		// {
-		// 	// if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
-		// 	// {	
-		// 		$this->Cell(8, $this->_h_c, '', 1,0, 'C');
-		// 		$this->Cell(8, $this->_h_c, '', 'BT',0, 'C');
-		// 		if( ($keyP+1) == count($this->periods))
-		// 			$this->Cell(6, $this->_h_c, '','BTR',0, 'C');
-		// 		else
-		// 			$this->Cell(6, $this->_h_c, '', 'BT',0, 'C');
-		// 	// }
-		// }
-
-
-		// $this->Ln($this->_h_c);
-		// // $this->Cell(10, $this->_h_c, '', 0, 0, '');
-		// $this->Cell(90, $this->_h_c, 'PUESTO EN EL GRUPO:',1,0,'');
-		// $this->Cell(6, $this->_h_c, '', 'BT',0, 'C');
-		// $this->Cell(6, $this->_h_c, '', 'BT', 0,'C');
-		// foreach ($this->periods as $keyP => $valueP) 
-		// {
-		// 	// if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
-		// 	// {	
-		// 		$this->Cell(8, $this->_h_c, '', 1,0, 'C');
-		// 		$this->Cell(8, $this->_h_c, '', 'BT',0, 'C');
-		// 		if( ($keyP+1) == count($this->periods))
-		// 			$this->Cell(6, $this->_h_c, '','BTR',0, 'C');
-		// 		else
-		// 			$this->Cell(6, $this->_h_c, '', 'BT',0, 'C');
-		// 	// }
-		// }
-
-		// $this->Ln($this->_h_c);
-		// $this->Cell(0, $this->_h_c, '', 0, 0, 'C');
 	}
 
 	private function createGeneralObservation()
@@ -434,33 +492,27 @@ class GradeBookPDF extends FPDF
 		
 		$this->Ln($this->_h_c * 4);
 		$this->SetFont('Arial','B',8);
-		$this->Cell(0,$this->_h_c, $this->infoGroupAndAsig['director_grupo'], 0, 0);
+		$this->Cell(0,$this->_h_c, 
+			$this->infoGroupAndAsig['doc_primer_nomb']." ".
+	    	$this->infoGroupAndAsig['doc_segundo_nomb']." ".
+	    	$this->infoGroupAndAsig['doc_primer_ape']." ".
+	    	$this->infoGroupAndAsig['doc_segundo_ape'], 0, 0);
 
 		
 		$this->Ln($this->_h_c);
 		$this->SetFont('Arial','',8);
 		$this->Cell(0, $this->_h_c, 'DIRECTOR DE GRUPO', 0,0);
-		// if(
-		// 	$this->infoGroupAndAsig['id_grado'] >= 1 && 
-		// 	$this->infoGroupAndAsig['id_grado'] <= 9
-		// )
-		// {
-		// 	$this->Cell(0, $this->_h_c, 'Faltas de asistencia durante el periodo: ', $border,0, 'L');
-		// }
-		// else
-		// {
-		// 	$this->Cell(0, $this->_h_c, '  ', $border,0, 'L');
-		// }
+
+		if($this->ImpDobleCara)
+		{	
+			if($this->PageNo()% 2 != 0 && $this->PageNo() > 2)
+				$this->AddPage();
+		}
 	}
 
 	private function LastConfig()
 	{
-		if($this->ImpDobleCara)
-		{
-			if($this->PageNo()% 2 != 0)
-				$this->AddPage();
-		}
-
+		
 		if($this->Impescala)
 		{	
 			$this->Ln($this->_h_c * 2);

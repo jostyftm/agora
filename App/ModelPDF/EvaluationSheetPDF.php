@@ -42,7 +42,7 @@ class EvaluationSheetPDF extends FPDF
 			$info = getimagesize($pic);
 
 		    // Logo
-		    $this->Image($pic, 12, 12, 20, 20, 'png');
+		    $this->Image($pic, 12, 14, 15, 15, 'png');
 		}
 		    
 	    // Marca de agua
@@ -126,7 +126,7 @@ class EvaluationSheetPDF extends FPDF
 	{
 		switch ($this->maxPeriod) {
 			case 1:
-				$this->_with_C_S = 78;
+				$this->_with_C_S = 85;
 				// $this->_with_C_H = 44;
 				break;
 			case 2:

@@ -1,0 +1,171 @@
+html, body{
+	font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	background-color: #f3f3f4;
+	color: #676a6c;
+	height: 100%;
+}
+
+#nav-header{
+	background-color: #fff;
+	border-bottom: 1px solid #e7eaec;
+}
+
+#nav-header #header-search-field{
+	padding-top: 17px;
+	vertical-align: center;
+	border: none;
+	width: 300px;
+	outline: none;
+}
+
+#nav-header ul{
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+	color: #676a6c;
+}
+
+#nav-header ul li{
+	float: left;
+	margin-left: 15px;
+	padding: 17px 0px;
+}
+
+#nav-header ul a{
+	text-decoration: none;
+
+}
+#nav-header ul .fa{
+	color: #676a6c;
+}
+
+#nav-header ul .label{
+	position: absolute;
+	margin-top: -10px;
+	margin-left: -5px;
+}
+
+#nav-header .fixed-with{
+	width: 35px;
+}
+
+#footerAd{
+	position: absolute;
+	width: 100%;
+	bottom: 0px;
+	background-color: #fff;
+	padding: 10px;
+	font-size: 12px;
+	color: #676a6c;
+}
+
+.log-out{
+	color: #676a6c;
+}
+
+.label-message{
+	background-color: #1ab394;
+}
+
+#sidebar{
+	background-color: #2f4050;
+	padding: 0;
+}
+
+#sidebar h1{
+	color: #1f3647;
+	text-align: center;
+	margin: 10px 0px;
+	font-size: 25px;
+}
+
+#sidebar ul{
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+#sidebar a{
+	padding: 12px 20px;
+	text-decoration: none;
+	color: #9fb1c2;
+	font-weight: bold;
+	font-size: 13px;
+	display: block;
+}
+
+#sidebar a:hover{
+	background-color: #293846;
+	color: #fff;
+}
+
+#sidebar .active a{
+	color: #fff;
+	background-color: #293846;
+}
+
+#sidebar .collapseable li{
+	padding: 5px 5px 10px 20px;
+	/*padding-left: 20px;
+	padding-top: 5px;*/
+}
+
+#sidebar .collapseable a{
+	color: #9fb1c2;
+	font-size: 12px;
+	padding: 0 10px;
+	text-decoration: none;
+	display: block;
+}
+
+#sidebar .collapseable a:hover{
+	color: #fff;
+}
+
+#sidebar .collapseable{
+	border-left: 4px solid #1ab394;
+	background-color: #293846;
+}
+#sidebar .fa{
+	margin-right: 6px;
+}
+.display-table{
+	display: table;
+	padding: 0px;
+	height: 100%;
+}
+
+.display-table-row{
+	display: table-row;
+	height: 100%;
+}
+
+.display-table-cell{
+	display: table-cell;
+	float: none;
+	height: 100%;
+}
+
+.navbar-default{
+	background-color: #fff;
+}
+
+.navbar-default .navbar-toggle{
+	border-color: #1ab394;
+	background-color: #1ab394;
+}
+
+.navbar-default .navbar-toggle .icon-bar{
+	background-color: #fff;
+}
+
+.navbar-default .navbar-toggle:hover{
+	background-color: #1ab394;
+}
+
+.navbar-default .navbar-toggle:focus{
+	background-color: #1ab394;
+}
+.valign-top{
+	vertical-align: top;
+}

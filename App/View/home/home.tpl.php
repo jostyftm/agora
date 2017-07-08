@@ -82,7 +82,7 @@
 						<td><a href="/institution/showFormEvaluationSheet/<?php echo DB;?>" target="_blank">Link</a></td>
 					</tr>
 					<tr>
-						<td>2</td>
+						<td>4</td>
 						<td>Boletin</td>
 						<td>Funcion que genera pdf's de los boletines estudiantiles de los estudiantes</td>
 						<td class=""><span class="label label-warning">En proceso</span></td>

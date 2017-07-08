@@ -41,6 +41,7 @@
 </div>
    <script src="<?php echo pb;?>js/jquery-1.12.4.js"></script>
    <script src="<?php echo pb;?>js/jquery.dataTables.min.js"></script>
+   <script src="<?php echo pb;?>js/jquery.dataTables.min.js"></script>
    <script src="<?php echo pb;?>js/dataTables.bootstrap.min.js"></script>
    
    <script type="text/javascript">

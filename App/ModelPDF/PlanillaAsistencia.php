@@ -21,9 +21,8 @@ class PlanillaAsistencia extends FPDF
 			$info = getimagesize($pic);
 
 		    // Logo
-		    $this->Image($pic, 6, 4, 20, 20, 'png');
-		    
-		 }
+		    $this->Image($pic, 12, 14, 15, 15, 'png');
+		}
 	    // Marca de agua
 
 	    //Marco

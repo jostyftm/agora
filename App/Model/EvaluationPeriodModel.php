@@ -70,19 +70,18 @@ class EvaluationPeriodModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
+	// Cambio
 	public function getGradeBookBySudent($id_student, $id_grade, $periods=array())
 	{
-		$this->query = "SELECT DISTINCT asi.asignatura, e.idstudents, CONCAT(e.primer_apellido,' ',e.segundo_apellido,' ',e.primer_nombre) AS estudiante, asi.id_asignatura, ar.area, aa.int_horaria AS ihs";
-
-		foreach ($periods as $key => $value) {
-			$this->query .= ", ev.inasistencia_p".($key+1).", p".($key+1).".peso AS periodo_".($key+1)."_peso, ev.".$value." periodo".($key+1)." ";
-		}
+		$this->query = "SELECT DISTINCT asi.id_asignatura, asi.asignatura, doc.primer_apellido AS doc_primer_ape, doc.segundo_apellido AS doc_segundo_ape, doc.primer_nombre AS doc_primer_nomb, doc.segundo_nombre AS doc_segundo_nomb, ar.area, aa.int_horaria AS ihs, ev.* ";
 
 		$this->query .= "FROM students e 
 						INNER JOIN t_evaluacion ev ON e.idstudents=ev.id_estudiante 
 						INNER JOIN t_asignaturas asi ON asi.id_asignatura=ev.id_asignatura 
 						INNER JOIN t_area ar ON ar.id_area=ev.id_area
-						INNER JOIN t_asignatura_x_area aa ON aa.id_asignatura=asi.id_asignatura AND aa.id_area=ar.id_area";
+						INNER JOIN t_asignatura_x_area aa ON aa.id_asignatura=asi.id_asignatura AND aa.id_area=ar.id_area
+						INNER JOIN grupo_x_asig_x_doce gd ON ev.id_grupo=gd.id_grupo AND ev.id_asignatura=gd.id_asignatura 
+						INNER JOIN docentes doc ON gd.id_docente=doc.id_docente";
 
 		foreach ($periods as $key => $value) { 
 		
@@ -94,7 +93,6 @@ class EvaluationPeriodModel extends DB
 						ORDER BY ar.order_area";
 		
 
-		// return $this->query;
 		$data = $this->getResultsFromQuery()['data'];
 
 		$calculoAreas = $this->filterBestResultsByGrade($id_student, $id_grade)['data'];
@@ -169,6 +167,24 @@ t_evaluacion.id_grado = t_asignatura_x_area.id_grado and t_evaluacion.id_grado =
 		";
 
 		return $this->getResultsFromQuery();
+	}
+
+	public function decideGradeBook($gradeBook, $period)
+	{	
+		$asginatureTotal = count($gradeBook['data']);
+		$cont = 0;
+		foreach ($gradeBook['data'] as $keyG => $valueG) 
+		{
+			if($valueG['eval_'.$period.'_per'] == NULL)
+			{
+				$cont ++;
+			}
+		}
+
+		if($cont == $asginatureTotal)
+			return false;
+
+		return true;
 	}
 
 	public function orderBestPerformancesByGroup($id_grade='', $id_group='')

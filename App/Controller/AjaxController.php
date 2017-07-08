@@ -103,8 +103,15 @@ class AjaxController
 
 		$students = $group->getClassRoomList($id_group)['data'];
 
-		foreach ($students as $key => $value) {
-			echo "<option value='".$value['idstudents']."'>".utf8_encode($value['estudiante'])."</option>";	
+		foreach ($students as $key => $value) 
+		{
+			echo "<option value='".$value['idstudents']."'>".
+					utf8_encode(
+						$value['primer_ape_alu']." ".
+						$value['segundo_ape_alu']." ".
+						$value['primer_nom_alu']." ".
+						$value['segundo_nom_alu']).
+				"</option>";	
 		}
 	}
 
