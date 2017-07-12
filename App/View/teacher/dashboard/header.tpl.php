@@ -8,12 +8,17 @@
 				<span class="icon-bar"></span>
 			</button>
 		</nav>
-		<input type="text" placeholder="Texto...." id="header-search-field" class="hidden-sm hidden-xs">
+		<!-- <input type="text" id="header-search-field" class="hidden-sm hidden-xs" value="INSTITUCIÓN EDUCATIVA TALES TALES" > -->
+		<ul>
+			<li>
+				INSTITUCIÓN EDUCATIVA TALES TALES
+			</li>
+		</ul>
 	</div>
 	<div class="col-md-7">
 		<ul class="pull-right">
 			<li>Bienvenido Pepito perez</li>
-			<li class="fixed-with">
+			<!-- <li class="fixed-with">
 				<a href="#">
 					<span class="fa fa-bell" arial-hidden="true"></span>
 					<span class="label label-warning">3</span>
@@ -24,7 +29,7 @@
 					<span class="fa fa-envelope" arial-hidden="true"></span>
 					<span class="label label-message">3</span>
 				</a>
-			</li>
+			</li> -->
 			<li>
 				<a href="#" class="log-out">
 					<span class="fa fa-sign-out" arial-hidden="true"></span>

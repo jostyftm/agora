@@ -95,7 +95,8 @@ class DataBase
 
         $this->closeConnect();
     }
-    
+
+
     // Obtiene los resultss de un query
     protected function get_result_query()
     {
@@ -121,6 +122,31 @@ class DataBase
         }
     }
 
+    // 
+    protected function executeQuerySingle()
+    {
+        $this->execute_single_query();
+
+        if($this->isError()){
+            throw new \Exception("Error ".$this->getErrorMessage());
+
+        }else if($this->results){
+                
+            return array(
+                'message'   => 'Consulta exitosa',
+                'state'     =>  true,
+                'data'      =>  $this->results
+            );
+
+        }else{
+            return array(
+                'message'   => 'no hay resultados',
+                'state'     =>  false,
+                'data'      => array()
+            );
+        }
+    }
+    // 
     protected function getResultsFromQuery(){
 
         $this->execute_single_query();

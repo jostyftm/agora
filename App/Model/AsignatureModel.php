@@ -19,10 +19,11 @@ class AsignatureModel extends DB
 			parent::__construct($db);
 	}
 
-	public function getInfo($id_asignature)
+	public function find($id_asignature)
 	{
 		$this->query = "SELECT * FROM {$this->table} WHERE id_asignatura='{$id_asignature}'";
 		return $this->getResultsFromQuery();
 	}
+
 }
 ?>

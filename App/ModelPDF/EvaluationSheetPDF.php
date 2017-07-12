@@ -160,7 +160,7 @@ class EvaluationSheetPDF extends FPDF
 
 		foreach ($this->evaluation_parameters as $key => $value) {
 
-            if($value['id_parametro'] == 4)
+            if($value['id_parametro_evaluacion'] == 4)
             {
             	$this->Cell($this->_with_A_E, 4, (ucwords($value['parametro'])), 1,0, 'C', true);
             }
@@ -192,7 +192,7 @@ class EvaluationSheetPDF extends FPDF
 			if(count($value['indicadores']) == 0)
 			{
 				for ($i=0; $i < 5; $i++) { 
-					$this->Cell( $this->_with_C_H / 5 , 4, $value['id_parametro'], 1,0, 'C', true);
+					$this->Cell( $this->_with_C_H / 5 , 4, $value['id_parametro_evaluacion'], 1,0, 'C', true);
 				}
 			}
 			foreach ($value['indicadores'] as $keyInd => $valueInd) {

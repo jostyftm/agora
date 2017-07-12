@@ -19,7 +19,17 @@ class GroupModel extends DB
 			parent::__construct($db);
 	}
 
-	// Cambio
+	// 
+	public function find($id_group)
+	{
+		$this->query = "SELECT * 
+						FROM {$this->table}
+						WHERE id_grupo={$id_group}";
+
+		return $this->getResultsFromQuery();
+	}
+
+	// Verificar si otra clase lo utiliza
 	public function getInfo($id_group){
 		$this->query = "SELECT g.id_grupo, g.nombre_grupo, d.primer_apellido AS doc_primer_ape, d.segundo_apellido AS doc_segundo_ape, d.primer_nombre AS doc_primer_nomb, d.segundo_nombre AS doc_segundo_nomb, j.jornada, s.sede, gra.id_grado
 						FROM docentes d

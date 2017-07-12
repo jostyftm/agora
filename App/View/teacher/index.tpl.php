@@ -8,15 +8,24 @@
       	<title></title>
 
       	<!-- Bootstrap -->
-      	<link href="<?php echo pb;?>css/bootstrap.css" rel="stylesheet" type="text/css">
-   		<link href="<?php echo pb;?>css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
+      	<link href="/Public/css/bootstrap.css" rel="stylesheet" type="text/css">
+   		  <link href="/Public/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
 
         <!-- Font Awesome -->
-        <link href="<?php echo pb;?>css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href="/Public/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
    		<!-- Style -->
-   		<link href="<?php echo pb;?>css/default.css" rel="stylesheet" type="text/css">
-
+   		<link href="/Public/css/default.css" rel="stylesheet" type="text/css">
+    
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+      <script src="/Public/js/jquery-1.12.4.js"></script>
+    
+      <!-- DataTables -->
+      <script src="/Public/js/jquery.dataTables.min.js"></script>
+      <script src="/Public/js/dataTables.bootstrap.min.js"></script>
+      
+      <!-- MultiSelect -->
+      <script src="/Public/js/multiselect.js"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -39,31 +48,36 @@
 					       <?php
 		             	include ('dashboard/header.tpl.php');
 		            ?>
+                <!-- SubHeader -->
+                <?php
+                  include ('dashboard/subheader.tpl.php');
+                ?>
 		            <!-- Content -->
-                    <?php
-                    	include ($include);
-                    ?>
+                  <div  class="container" id="content">
+                      <?php
+                        include ($include);
+                      ?>
+                  </div>
                </div>
                <div class="row">
                		<!-- Footer -->
                   	<footer id="footerAd" class="clearfix">
                     	<div class="pull-left">
-							<b>Derechos Reservados </b>&copy; <?php  echo date('Y') ?>
-						</div>
-						<div class="pull-right">
-							@tenea
-						</div> 
+          							<b>Derechos Reservados </b>&copy; <?php  echo date('Y') ?>
+          						</div>
+          						<dsiv class="pull-right">
+          							@tenea
+          						</div> 
                   	</footer>
                </div>
             </div>
          </div>
       </div>
 
-      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-      <script src="<?php echo pb;?>js/jquery-1.12.4.js"></script>
+      
       <!-- Include all compiled plugins (below), or include individual files as needed -->
-      <script src="<?php echo pb;?>js/bootstrap.js"></script>
+      <script src="/Public/js/bootstrap.js"></script>
       <!--  -->
-      <script src="<?php echo pb;?>js/default.js"></script>
+      <script src="/Public/js/default.js"></script>
    </body>
 </html>

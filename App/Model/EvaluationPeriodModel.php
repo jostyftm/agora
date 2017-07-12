@@ -34,9 +34,11 @@ class EvaluationPeriodModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
+	//En uso
 	public function getPeriodsWithOutEvaluating($column, $id_asignature, $id_group){
-		$this->query = "SELECT e.$column AS periodo, e.id_estudiante, CONCAT(e.primer_apellido,' ',e.segundo_apellido,' ',e.primer_nombre,' ',e.segundo_nombre) AS estudiante, a.id_asignatura, a.asignatura, g.nombre_grupo, g.id_grupo 
-						FROM {$this->table} e 
+		$this->query = "SELECT e.$column AS periodo, s.idstudents, s.primer_apellido AS primer_ape_alu, s.segundo_apellido AS segundo_ape_alu, s.primer_nombre AS primer_nom_alu, s.segundo_nombre AS segundo_nom_alu, a.id_asignatura, a.asignatura, g.nombre_grupo, g.id_grupo 
+						FROM {$this->table} e
+						INNER JOIN students s ON e.id_estudiante=s.idstudents
 						INNER JOIN t_grupos g ON g.id_grupo={$id_group} AND e.id_grupo=g.id_grupo 
 						INNER JOIN t_asignaturas a ON a.id_asignatura={$id_asignature} AND e.id_asignatura=a.id_asignatura 
 						WHERE e.$column IS NULL OR e.$column = 0 
@@ -55,18 +57,20 @@ class EvaluationPeriodModel extends DB
 
 	public function getPeriods($maxPeriod, $id_asignature, $id_group)
 	{
-		$this->query = "SELECT e.primer_apellido AS alu_primer_ape, e.segundo_apellido AS alu_segundo_ape, e.primer_nombre AS alu_primer_nom, e.segundo_nombre AS alu_segundo_nom, d.primer_apellido AS dir_primer_ape, d.segundo_apellido AS dir_segundo_ape, d.primer_nombre AS dir_primer_nom, d.segundo_apellido AS dir_segundo_nom, g.id_grupo, g.nombre_grupo, a.id_asignatura, a.asignatura, e.novedad, e.estatus";
+		$this->query = "SELECT e.id_estudiante AS id_estudiante, e.primer_apellido AS alu_primer_ape, e.segundo_apellido AS alu_segundo_ape, e.primer_nombre AS alu_primer_nom, e.segundo_nombre AS alu_segundo_nom, d.primer_apellido AS dir_primer_ape, d.segundo_apellido AS dir_segundo_ape, d.primer_nombre AS dir_primer_nom, d.segundo_apellido AS dir_segundo_nom, g.id_grupo, g.nombre_grupo, a.id_asignatura, a.asignatura, IF((SELECT nv.abrev FROM novedades nv INNER JOIN novedades_x_estudiante_fecha nef ON nef.idstudents=id_estudiante WHERE nv.id_novedad=nef.id_novedad) IS NULL, '', (SELECT nv.abrev FROM novedades nv INNER JOIN novedades_x_estudiante_fecha nef ON nef.idstudents=id_estudiante WHERE nv.id_novedad=nef.id_novedad)) AS novedad, s.estatus";
 
 		for ($i=0; $i < $maxPeriod; $i++) { 
 			$this->query .= ", e.eval_".($i+1)."_per periodo".($i+1)." ";
 		}
 
 		$this->query .= " FROM t_evaluacion e
-						INNER JOIN t_grupos g ON e.id_grupo=g.id_grupo AND g.id_grupo={$id_group}
+						INNER JOIN t_grupos g ON e.id_grupo=g.id_grupo AND g.id_grupo={$id_group}	
+						INNER JOIN students s ON s.idstudents=e.id_estudiante
 						INNER JOIN t_asignaturas a ON e.id_asignatura=a.id_asignatura AND a.id_asignatura={$id_asignature}
 						INNER JOIN docentes d ON g.id_director_grupo=d.id_docente
 						ORDER BY e.primer_apellido";
 
+		return $this->query;
 		return $this->getResultsFromQuery();
 	}
 
@@ -154,17 +158,17 @@ class EvaluationPeriodModel extends DB
 	{
 		$this->query = "
 						SELECT 
-t_evaluacion.id_estudiante, t_evaluacion.primer_apellido, t_evaluacion.primer_nombre, t_evaluacion.segundo_nombre, t_evaluacion.id_area,t_evaluacion.id_asignatura
-, t_evaluacion.id_grado, t_evaluacion.id_grupo, t_asignatura_x_area.peso_frente_area as Peso,
- (SELECT t_area.area FROM t_area WHERE t_area.id_area = t_evaluacion.id_area) as Area
-,IF((t_asignatura_x_area.peso_frente_area > 0)
-, ROUND(SUM(t_evaluacion.eval_1_per * (t_asignatura_x_area.peso_frente_area / 100)),1), 
-ROUND((sum(t_evaluacion.eval_1_per /(SELECT count(DISTINCT t_asignatura_x_area.id_asignatura) FROM t_asignatura_x_area where t_asignatura_x_area.id_area = t_evaluacion.id_area  and t_evaluacion.id_grado = t_asignatura_x_area.id_grado) )),2)) as Valoracion
-FROM t_evaluacion
-INNER JOIN t_asignatura_x_area ON t_asignatura_x_area.id_area  = t_evaluacion.id_area
-and t_asignatura_x_area.id_asignatura = t_evaluacion.id_asignatura AND
-t_evaluacion.id_grado = t_asignatura_x_area.id_grado and t_evaluacion.id_grado = {$id_grade} and t_evaluacion.id_estudiante={$id_student} GROUP BY t_evaluacion.id_estudiante, t_evaluacion.id_area ORDER BY t_evaluacion.primer_apellido, t_evaluacion.primer_nombre DESC;
-		";
+					t_evaluacion.id_estudiante, t_evaluacion.primer_apellido, t_evaluacion.primer_nombre, t_evaluacion.segundo_nombre, t_evaluacion.id_area,t_evaluacion.id_asignatura
+					, t_evaluacion.id_grado, t_evaluacion.id_grupo, t_asignatura_x_area.peso_frente_area as Peso,
+					 (SELECT t_area.area FROM t_area WHERE t_area.id_area = t_evaluacion.id_area) as Area
+					,IF((t_asignatura_x_area.peso_frente_area > 0)
+					, ROUND(SUM(t_evaluacion.eval_1_per * (t_asignatura_x_area.peso_frente_area / 100)),1), 
+					ROUND((sum(t_evaluacion.eval_1_per /(SELECT count(DISTINCT t_asignatura_x_area.id_asignatura) FROM t_asignatura_x_area where t_asignatura_x_area.id_area = t_evaluacion.id_area  and t_evaluacion.id_grado = t_asignatura_x_area.id_grado) )),2)) as Valoracion
+					FROM t_evaluacion
+					INNER JOIN t_asignatura_x_area ON t_asignatura_x_area.id_area  = t_evaluacion.id_area
+					and t_asignatura_x_area.id_asignatura = t_evaluacion.id_asignatura AND
+					t_evaluacion.id_grado = t_asignatura_x_area.id_grado and t_evaluacion.id_grado = {$id_grade} and t_evaluacion.id_estudiante={$id_student} GROUP BY t_evaluacion.id_estudiante, t_evaluacion.id_area ORDER BY t_evaluacion.primer_apellido, t_evaluacion.primer_nombre DESC;
+							";
 
 		return $this->getResultsFromQuery();
 	}

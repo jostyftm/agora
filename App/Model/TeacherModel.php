@@ -22,30 +22,15 @@ class TeacherModel extends DB
 	{
 		$this->query = "SELECT * FROM {$this->table} WHERE id_docente={$id}";
 
-		$this->execute_single_query();
-
-		if($this->isError()){
-			throw new \Exception("Error ".$this->getErrorMessage());
-
-		}else if($this->results->num_rows > 0){
-
-			$this->get_result_query();
-				
-			return array(
-				'message' 	=> 'Consulta exitosa',
-				'state'		=>	true,
-				'data'		=>	$this->rows
-			);
-
-		}else{
-			return array(
-				'message' 	=> 'no hay resultados',
-				'state'		=>	false,
-				'data'		=> array()
-			);
-		}
+		return $this->getResultsFromQuery();
 	}
 
+	/*
+	 *	Funcion para obtener las asignturas y grupos que dictan un profesor
+	 *
+	 *	@param $id_teacher
+	 *  @return query results
+	*/
 	public function getAsignaturesAndGroups($id_teacher)
 	{
 
@@ -53,11 +38,82 @@ class TeacherModel extends DB
 						FROM t_asignaturas a
 						INNER JOIN grupo_x_asig_x_doce ad ON a.id_asignatura=ad.id_asignatura
 						INNER JOIN t_grupos g ON ad.id_grupo=g.id_grupo
-						WHERE ad.id_docente = '{$id_teacher}' ";
+						WHERE ad.id_docente = '{$id_teacher}' 
+						ORDER BY a.asignatura";
 
 		return $this->getResultsFromQuery();
 
 	}
+
+	/*
+	 * Funcion que obtiene todos los grupos de un director de curso
+	 *
+	 * @param $id_teacher
+	 * @return query results
+	*/
+	public function getGroupByDirector($id_teacher)
+	{
+		$this->query = "SELECT *
+						FROM t_grupos g
+						WHERE g.id_director_grupo = '{$id_teacher}' 
+						ORDER BY g.nombre_grupo";
+
+		return $this->getResultsFromQuery();
+	}
+
+	/*
+	 *	Funcion que determina si un profesor es director de grupo
+	 *
+	 * @param $id_teacher
+	 * @return boolean
+	*/
+	public function isDirector($id_teacher)
+	{
+		return $this->getGroupByDirector($id_teacher)['state'];
+			
+	}
+
+
+	/*
+	 *	Funcion que devuelve las observaciones generales
+	 *
+	 * @param $id_teacher
+	 * @return result query
+	*/
+	public function getGeneralObservations($id_teacher)
+	{
+
+		$this->query = "SELECT ogp.id_observ_generales_periodo AS id_observacion, s.idstudents, s.primer_apellido AS p_a_alu, s.segundo_apellido AS s_a_alu, s.primer_nombre AS p_n_alu, s.segundo_nombre AS s_n_alu, ogp.id_periodo, ogp.observaciones,g.nombre_grupo 
+						FROM observ_generales_periodo ogp 
+						INNER JOIN students s ON ogp.id_estudiante=s.idstudents 
+						INNER JOIN t_grupos g ON ogp.id_grupo=g.id_grupo 
+						WHERE ogp.id_director_grupo={$id_teacher}
+						ORDER BY p_n_alu";
+
+		return $this->getResultsFromQuery();
+	}
+
+	/*
+	 *	Funcion que devuelve las observaciones generales
+	 *
+	 * @param $id_teacher
+	 * @return result query
+	*/
+	public function getGeneralReportPeriod($id_teacher)
+	{
+		$this->query = "SELECT s.idstudents, s.primer_apellido AS p_a_alu, s.segundo_apellido AS s_a_alu, s.primer_nombre AS p_n_alu, s.segundo_nombre AS s_n_alu, igp.id_periodo, igp.observaciones,g.nombre_grupo 
+						FROM informe_general_periodo igp 
+						INNER JOIN students s ON igp.id_estudiante=s.idstudents 
+						INNER JOIN t_grupos g ON igp.id_grupo=g.id_grupo 
+						WHERE igp.id_director_grupo={$id_teacher}
+						ORDER BY p_n_alu";
+
+		return $this->getResultsFromQuery();
+	}
+
+
+
+
 
 	public function getInfoAsignatureAndGroup($id_asignature, $id_group){
 		$this->query = "SELECT CONCAT(d.primer_apellido,' ',d.segundo_apellido,' ',d.primer_nombre,' ',d.segundo_nombre) AS docente, CONCAT(dir.primer_apellido,' ', dir.segundo_apellido,' ',dir.segundo_nombre,' ',dir.primer_nombre,' ',dir.segundo_nombre) AS director_grupo, a.id_asignatura, a.asignatura, g.id_grupo, g.nombre_grupo, s.sede, j.jornada

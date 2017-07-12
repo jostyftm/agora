@@ -80,18 +80,18 @@ class PdfController
 					$id_group
 				)['data'];
 
-		// print_r($resp);
-		$pdf->maxPeriod = split('_', $maxPeriod)[1];
-		$pdf->institution = $infoIns;
-		$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-		$pdf->evaluation_parameters = $evaluation_parameters;
-		$pdf->DC = $ind_DC;
-		$pdf->DP = $ind_DP;
-		$pdf->DS = $ind_DS;
-		$pdf->AddPage();
-		$pdf->showData($resp);
-		$pdf->SetFont('Arial','B',16);
-		$pdf->Output('pdf/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'I');
+		print_r($resp);
+		// $pdf->maxPeriod = split('_', $maxPeriod)[1];
+		// $pdf->institution = $infoIns;
+		// $pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
+		// $pdf->evaluation_parameters = $evaluation_parameters;
+		// $pdf->DC = $ind_DC;
+		// $pdf->DP = $ind_DP;
+		// $pdf->DS = $ind_DS;
+		// $pdf->AddPage();
+		// $pdf->showData($resp);
+		// $pdf->SetFont('Arial','B',16);
+		// $pdf->Output('pdf/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'I');
 	}
 
 	// Cambio
@@ -267,16 +267,19 @@ class PdfController
 							split('_', $_POST['periodo'])[1],
 							$id_asignature,
 							$id_group
-						)['data'];
-				$pdf->maxPeriod = split('_', $_POST['periodo'])[1];
-				$pdf->evaluation_parameters = $evaluation_parameters;
-				$pdf->institution = $infoIns;
-				$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-				$pdf->AddPage();
-				$pdf->showData($resp);
-				$pdf->Output($path.'/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'F');
+						);
+
+
+				print_r($resp);
+				// $pdf->maxPeriod = split('_', $_POST['periodo'])[1];
+				// $pdf->evaluation_parameters = $evaluation_parameters;
+				// $pdf->institution = $infoIns;
+				// $pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
+				// $pdf->AddPage();
+				// $pdf->showData($resp);
+				// $pdf->Output($path.'/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'F');
 			}
-			$this->mergePDF($path, $_POST['opcion']['orientacion']);
+			// $this->mergePDF($path, $_POST['opcion']['orientacion']);
 		}
 	}
 }
