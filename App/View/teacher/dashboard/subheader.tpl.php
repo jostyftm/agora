@@ -1,8 +1,8 @@
 <header class="sub_header container-fluid">
-	<i class="<?php echo $subheader['icon']?> fa-3x fa-fw"></i>
+	<i class="<?php echo $subheader['icon']?>  fa-fw"></i>
 	<div class="inline-block">
-		<h3><?php echo $subheader['title']; ?></h3>
-		<p>Description</p>
+		<h4><?php echo $subheader['title']; ?></h4>
+		<p></p>
 	</div>
 
 	<?php

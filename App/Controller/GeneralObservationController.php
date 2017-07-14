@@ -25,30 +25,30 @@ class GeneralObservationController
 	*/
 	public function indexAction($role)
 	{
+		// Validanos la Sesion
+		if(true):
 
-		if($role == 'teacher'):
+			// Validamos el rol
+			if(isset($role) && $role == 'teacher'):
 
-			$teacher = new Teacher(DB);
-			$gObservation = $teacher->getGeneralObservations(TC)['data'];
+				$teacher = new Teacher(DB);
+				$gObservation = $teacher->getGeneralObservations(TC)['data'];
 
-			$view = new View(
-				'teacher/partials/evaluation/observations',
-				'home',
-				[
-					'tittle_panel'	=>	'Observaciones Generales',
-					'observations'	=>	$gObservation,
-					'history'		=>	array(
-						'current'	=> '/generalObservation/index/teacher'
-					)
-				]
-			);
+				$view = new View(
+					'teacher/partials/evaluation/observations',
+					'home',
+					[
+						'tittle_panel'	=>	'',
+						'observations'	=>	$gObservation,
+						'history'		=>	array(
+							'current'	=> '/generalObservation/index/teacher'
+						)
+					]
+				);
 
-			$view->execute();
+				$view->execute();
 
-		elseif($role == 'institution'):
-			echo "institution";
-		else:
-			echo "404 no se puede mostrar el contenido";
+			endif;
 		endif;
 	}
 
@@ -61,42 +61,32 @@ class GeneralObservationController
 	public function createAction()
 	{
 		// Validamos la session
-		if(true)
-		{
-			// Validamos la peticion GET
-			if(isset($_GET['request']) && $_GET['request']== 'crud')
-			{
+		if(true):
 
-				if($_GET['rol'] == 'teacher')
-				{
-					$teacher = new Teacher(DB);
-					$period = new Period(DB);
+			if(isset($_GET['rol']) && $_GET['rol'] == 'teacher'):
+				$teacher = new Teacher(DB);
+				$period = new Period(DB);
 
-					$myGroups = $teacher->getGroupByDirector(TC)['data'];
-					$periods = $period->getPeriods()['data'];
+				$myGroups = $teacher->getGroupByDirector(TC)['data'];
+				$periods = $period->getPeriods()['data'];
 
-					$view = new View(
-						'teacher/partials/evaluation/observations',
-						'create',
-						[
-							'tittle_panel'	=>	'Agregar Observaciones Generales',
-							'myGroups'		=>	$myGroups,
-							'periods'		=>	$periods,
-							'back'			=>	$_GET['options']['back']
-						]
-					);
+				$view = new View(
+					'teacher/partials/evaluation/observations',
+					'create',
+					[
+						'tittle_panel'	=>	'Agregar Observaciones Generales',
+						'myGroups'		=>	$myGroups,
+						'periods'		=>	$periods,
+						'back'			=>	$_GET['options']['back']
+					]
+				);
 
-					$view->execute();
-				}
+				$view->execute();
+			endif;
 				
-			}else{
-				echo "404 no se puede mostrar esta pagina";
-			}
-		}
-		else
-		{
-
-		}
+		else:
+			echo "404 no se puede mostrar esta pagina";
+		endif;
 	}
 
 	/*
@@ -134,33 +124,27 @@ class GeneralObservationController
 	*/
 	public function showAction($id_observation)
 	{
-		
 		// Validamos la sesion
 		if(true):
-		
-			// Validamos la peticion GET
-			if(isset($_GET['request']) && $_GET['request']== 'crud'):
-			
-				$response = $this->_generalObservation->find($id_observation)['data'][0];
+			$response = $this->_generalObservation->find($id_observation)['data'][0];
 
-				if(isset($_GET['rol']) && $_GET['rol'] == 'teacher'):
-					$view = new View(
-						'teacher/partials/evaluation/observations',
-						'show',
-						[
-							'tittle_panel'	=>	'Ver Observaciones Generales',
-							'observation'		=>	$response,
-							'back'			=>	$_GET['options']['back']
-						]
-					);
+			if(isset($_GET['rol']) && $_GET['rol'] == 'teacher'):
+				$view = new View(
+					'teacher/partials/evaluation/observations',
+					'show',
+					[
+						'tittle_panel'	=>	'Ver Observaciones Generales',
+						'observation'		=>	$response,
+						'back'			=>	$_GET['options']['back']
+					]
+				);
 
-					$view->execute();
+				$view->execute();
 
-				elseif(isset($_GET['rol']) && $_GET['rol'] == 'institution'):
-					echo "institution";
-				else:
-					echo "404 no se puede mostrar el contenido";
-				endif;
+			elseif(isset($_GET['rol']) && $_GET['rol'] == 'institution'):
+				echo "institution";
+			else:
+				echo "404 no se puede mostrar el contenido";
 			endif;
 		endif;
 
@@ -177,32 +161,26 @@ class GeneralObservationController
 	{
 		// Validamos la Sesion
 		if(true):
+			$response = $this->_generalObservation->find($id_observation)['data'][0];
 
-			// Validamos la peticion
-			if(isset($_GET['request']) && $_GET['request'] == 'crud'):
+			// Validamos el tipo de usuario
+			if(isset($_GET['rol']) && $_GET['rol'] == 'teacher'):
 
-				$response = $this->_generalObservation->find($id_observation)['data'][0];
+				$view = new View(
+					'teacher/partials/evaluation/observations',
+					'edit',
+					[
+						'tittle_panel'	=>	'Editar Observaciones Generales',
+						'observation'		=>	$response,
+						'back'			=>	$_GET['options']['back']
+					]
+				);
 
-				// Validamos el tipo de usuario
-				if($_GET['rol'] == 'teacher'):
-
-					$view = new View(
-						'teacher/partials/evaluation/observations',
-						'edit',
-						[
-							'tittle_panel'	=>	'Editar Observaciones Generales',
-							'observation'		=>	$response,
-							'back'			=>	$_GET['options']['back']
-						]
-					);
-
-					$view->execute();
-
-				elseif($_GET['rol'] == 'institution'):
-					echo "institution";
-				else:
-					echo "404 no se puede mostrar el contenido";
-				endif;
+				$view->execute();
+			elseif($_GET['rol'] == 'institution'):
+				echo "institution";
+			else:
+				echo "404 no se puede mostrar el contenido";
 			endif;
 		endif;
 	}
@@ -232,7 +210,6 @@ class GeneralObservationController
 	*/
 	public function deleteAction()
 	{
-		sleep(2);
 		if($this->_generalObservation->delete($_POST['id_observation'])['state']):
 			$teacher = new Teacher(DB);
 			$gObservation = $teacher->getGeneralObservations(TC)['data'];;

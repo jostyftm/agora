@@ -55,7 +55,7 @@
 						<div class="col-md-offset-2 col-md-7">
 							<div class="form-group">
 								<label for="">Observación</label>
-								<textarea class="form-control" id="editor1" rows="5" name="observation"></textarea>
+								<textarea class="form-control" id="saveObsGeneral" rows="5" name="observation"></textarea>
 							</div>
 							<div class="form-group text-center">
 								<input type="hidden" name="role" value="teacher">
@@ -69,12 +69,11 @@
 		</div>
 	</div>
 </div>
-
 <script src="/Public/plugin/ckeditor/ckeditor.js"></script>
 <script>
 	$(document).ready(function(){
  
-   		CKEDITOR.replace( 'editor1' );
+   		CKEDITOR.replace( 'saveObsGeneral' );
 
    		// Ajax para el select
    		$('#selectGroup').change(function(){
@@ -112,12 +111,7 @@
 			var students = $("#selectClassRoom_to").val(),
 				group = $("#selectGroup").val(),
 				period = $("#period").val(),
-				observation = CKEDITOR.instances.editor1.getData();
-
-				console.log(students);
-				console.log(group);
-				console.log(period);
-				console.log(observation);
+				observation = CKEDITOR.instances.saveObsGeneral.getData();
 
 			$.ajax({
 				type: form.attr('method'),

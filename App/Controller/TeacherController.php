@@ -14,9 +14,13 @@ use App\Model\EvaluationPeriodModel as Evaluation;
 class TeacherController
 {
 	
+	private $_teacher;
+	private $_periods;
+
 	function __construct()
 	{
-		
+		$this->_teacher = new Teacher(DB);	
+		$this->_periods = new Period(DB);
 	}
 	// 
 	public function HomeAction($db='', $idTeacher='')
@@ -69,7 +73,7 @@ class TeacherController
 			'icon'	=>	'fa fa-check',
 			'items'	=>	array(
 				1	=>	array(
-					'title'	=>	'Evaluar Periodo',
+					'title'	=>	'Evaluar',
 					'link'	=>	'/teacher/evaluationPeriod',
 					'active' =>	'active'
 				)
@@ -86,7 +90,7 @@ class TeacherController
 			));
 			array_push($subheader['items'], array(
 				'title'	=>	'Informe General de Periodo',
-				'link'	=>	'/teacher/generalReportPeriod',
+				'link'	=>	'/generalReportPeriod/index/teacher',
 				'active' =>	''
 			));
 		}
@@ -95,7 +99,7 @@ class TeacherController
 			'teacher',
 			'index',
 			[
-				'tittle_panel'		=>	'Evaluar Periodo',
+				'tittle_panel'		=>	'',
 				'include'			=>	'partials/evaluation/home.tpl.php',
 				'subheader'			=>	$subheader,
 				'groupsAndAsign'	=>	$groupsAndAsign
@@ -104,6 +108,41 @@ class TeacherController
 
 		$view->execute();
 	}
+
+	// 
+	public function sheetsAction()
+	{
+		// Validamos Sesion
+		if(true):
+
+			$periods = $this->_periods->getPeriods()['data'];
+
+			$asignatures = $this->_teacher->getAsignaturesAndGroups(TC)['data'];
+			$subheader = array(
+				'title'	=>	'Planillas',
+				'icon'	=>	'fa fa-file-text-o',
+				'items'	=>	array()
+			);
+
+			$view = new View(
+				'teacher',
+				'index',
+				[
+					'include'		=>	'partials/sheets/home.tpl.php',
+					'tittle_panel'	=>	'Planillas',
+					'subheader'		=>	$subheader,
+					'asignatures'	=>	$asignatures,
+					'periods'		=>	$periods
+
+				]
+			);
+
+			$view->execute();
+		endif;
+	}
+
+
+
 
 	/*
 	 * FUNCIONES QUE SE RENDERIZAN MEDIANTE AJAX
@@ -126,68 +165,6 @@ class TeacherController
 
 		$view->execute();
 	}
-
-	// 
-	public function generalReportPeriodAction()
-	{
-		$teacher = new Teacher(DB);
-		$reports = $teacher->getGeneralReportPeriod(TC)['data'];
-
-		$view = new View(
-			'teacher/partials/evaluation/generalReport',
-			'home',
-			[
-				'tittle_panel'	=>	'Informe General de Periodo',
-				'reports'	=>	$reports
-			]
-		);
-
-		$view->execute();
-	}
-
-	// 
-	public function createGeneralReportPeriodAction()
-	{	
-		// Validamos la session
-		if(true)
-		{
-			// Validamos la peticion GET
-			if(isset($_GET['options']['request']) && $_GET['options']['request']== 'spa')
-			{
-				$teacher = new Teacher(DB);
-				$period = new Period(DB);
-
-				$myGroups = $teacher->getGroupByDirector(TC)['data'];
-				$periods = $period->getPeriods()['data'];
-
-				$view = new View(
-					'teacher/partials/evaluation/generalReport',
-					'create',
-					[
-						'tittle_panel'		=>	'Crear Informe General de Periodo',
-						'myGroups'		=>	$myGroups,
-						'periods'		=>	$periods,
-						'back'			=>	$_GET['options']['back']
-					]
-				);
-
-				$view->execute();		
-			}
-			else
-			{
-				echo "404 no se puede mostrar esta pagina";
-			}
-		}
-		else
-		{
-
-		}
-		
-	}
-
-	// 
-
-
 
 
 	// 
@@ -270,13 +247,12 @@ class TeacherController
 		$infoGroup = $group->getInfo($id_group)['data'][0];
 		$infoAsignature = $asignature->find($id_asginature)['data'][0];
 
-		
-
 
 		$view = new View(
-			'reportPDF',
-			'formEvaluationSheet', //.$model,
-			[
+			'teacher/partials/sheets',
+			'evaluation', //.$model,
+			[	
+				'tittle_panel'	=>	'Planilla de Evaluación',
 				'asignature'	=> 	$infoAsignature,
 				'group'			=>	$infoGroup,
 				// 'model'			=> 	$model

@@ -11,25 +11,25 @@
 		  		<div class="row">
 		  			<div class="col-md-12">
 		  				<h2><?php echo 
-		  					$observation['p_n_alu']." ".
-		  					$observation['s_n_alu']." ".
-		  					$observation['p_a_alu']." ".
-		  					$observation['s_a_alu']
+		  					$report['p_n_alu']." ".
+		  					$report['s_n_alu']." ".
+		  					$report['p_a_alu']." ".
+		  					$report['s_a_alu']
 		  				?></h2>
-		  				<span>GRUPO: <strong><?php echo $observation['nombre_grupo']?></strong></span>
-		  				<span>Periodo: <strong><?php echo $observation['id_periodo']; ?> </strong></span>
+		  				<span>GRUPO: <strong><?php echo $report['nombre_grupo']?></strong></span>
+		  				<span>Periodo: <strong><?php echo $report['id_periodo']; ?> </strong></span>
 		  			</div>
 		  		</div>
 		  		<div class="row">
-		  			<div class="col-md-offset-2 col-md-7">
-		  				<form action="/GeneralObservation/update" method="POST" id="updateObservationGeneral" enctype="application/x-www-form-urlencoded">
+		  			<div class="col-md-12">
+		  				<form action="/generalReportPeriod/update" method="POST" id="generalReportPeriod" enctype="application/x-www-form-urlencoded">
 							<div class="form-group">
 								<label for="">Observación</label>
-								<textarea class="form-control" id="editObsGeneral" rows="5" name="observation"><?php echo $observation['observaciones']?></textarea>
+								<textarea class="form-control" id="id_textReportEdit" rows="5" name="observation"><?php echo utf8_encode($report['observaciones'])?></textarea>
 							</div>
 							<div class="form-group text-center">
-								<input type="hidden" id="id_observation" name="id_observation" value="<?php echo $observation['id_observacion']?>">
-								<input type="submit" class="btn btn-primary" value="Crear Observacion General" />
+								<input type="hidden" id="id_report" name="id_report" value="<?php echo $report['id_reporte']?>">
+								<input type="submit" class="btn btn-primary" value="Actualizar Informe General de Periodo" />
 							</div>
 						</form>
 					</div>
@@ -42,7 +42,7 @@
 <script>
 	$(document).ready(function(){
 
-		CKEDITOR.replace( 'editObsGeneral' );
+		CKEDITOR.replace('id_textReportEdit');
 
 		// Peticiones para los enlaces
 		$('[data-request="backHistory"]').click(function(e){
@@ -76,20 +76,20 @@
 		});
 
 		// Guardar dinamicamente
-		$("#updateObservationGeneral").submit(function(e){
+		$("#generalReportPeriod").submit(function(e){
 			e.preventDefault();
 
-			var form = $("#updateObservationGeneral");
+			var form = $("#generalReportPeriod");
 
-			var	observation = CKEDITOR.instances.editObsGeneral.getData(),
-				id_observation = $("#id_observation").val();
+			var	observation = CKEDITOR.instances.id_textReportEdit.getData(),
+				id_report = $("#id_report").val();
 
 			$.ajax({
 				type: form.attr('method'),
 				url: form.attr('action'),
 				dataType: 'json',
 				data: {
-					id_observation,
+					id_report,
 					observation
 				},
 				success: function(data){

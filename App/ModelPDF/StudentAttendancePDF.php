@@ -6,7 +6,7 @@ use Lib\merge\FPDF as FPDF;
 /**
 * 
 */
-class PlanillaAsistencia extends FPDF
+class StudentAttendancePDF extends FPDF
 {
 	
 	public $tipo = 'Planilla de asistencia';
@@ -127,6 +127,7 @@ class PlanillaAsistencia extends FPDF
 
 	public function showData($lista){
 
+		$this->AddPage();
 		$this->SetFont('Arial','',8);
 
 		foreach ($lista as $clave => $valor) {

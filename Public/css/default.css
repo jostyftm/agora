@@ -84,10 +84,10 @@ textarea {
 
 #sidebar .image{
 	background-color: #fff;
-	height: 181px;
+	height: 120px;
 	border-bottom: 1px solid #ddd;
 
-	padding-top: 25%;
+	padding-top: 5%;
 	padding-left: 25%;
 }
 
@@ -213,3 +213,15 @@ textarea {
 .tab-nav > li > a::after { background: #21527d none repeat scroll 0% 0%; color: #fff; }
 .tab-pane { padding: 15px 0; }
 .tab-content{padding:20px}
+
+/**/
+
+@media (min-width: 992px){
+	.modal-lg {
+    	width: 95%;
+    }
+
+    .modal-lg .modal-body{
+    	height: 500px;
+    }
+}

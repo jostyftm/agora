@@ -25,14 +25,15 @@ class EvaluationSheetPDF extends FPDF
 
 	private $_with_C_S = 78; //Ancho de la celda del nombre del estudiante
 	private $_with_C_N_E_P = 8; //Ancho de la celda novedad (NOV) y estatus (EST) y Periodo (P)
-	private $_with_C_H = 42; //Ancho de la celda donde estan los header (Desempeños)
-	private $_with_A_E = 17;
+	private $_with_C_H = 50; //Ancho de la celda donde estan los header (Desempeños)
+	private $_with_A_E = 10; //Ancho para la celda de AE Cambio
 
 	private $fontSizeHeader = 9;
 
 	private $_with_title = 120;
 	private $_with_DR = 120;
-	private $_with_gr = 65;
+	private $_with_gr = 75;
+	private $_with_cellSpace = 25;
 
 	function Header(){
 		
@@ -60,11 +61,12 @@ class EvaluationSheetPDF extends FPDF
 	    {	
 	    	// $this->_with_C_S = 100;
 	    	$this->_with_title = 10;
-	    	$this->_with_gr = 40;
+	    	$this->_with_gr = 54;
 	    	$this->_with_doc = 65;
 	    	$this->_with_C_H = 48;
-	    	$this->fontSizeHeader = 6;
+	    	$this->fontSizeHeader = 7;
 	    	$this->_with_DR = 90;
+			$this->_with_cellSpace = 17;
 	    }
 	    // Título
 	    $this->Cell($this->_with_title, 6, $this->institution['nombre_inst'], 0, 0, 'C');
@@ -79,7 +81,7 @@ class EvaluationSheetPDF extends FPDF
 	    $this->SetFont('Arial','B',$this->fontSizeHeader);
 	    $this->Cell(90, 4, '', 0,0);
 	    // Título
-	    $this->Cell($this->_with_title,4, ucwords($this->infoGroupAndAsig['sede']), 0, 0, 'C');
+	    $this->Cell($this->_with_title,4, strtoupper($this->infoGroupAndAsig['sede']), 0, 0, 'C');
 	    // Movernos a la derecha
 	    $this->Cell(0, 4, '', 0,0);
 	    // Salto de línea
@@ -88,7 +90,7 @@ class EvaluationSheetPDF extends FPDF
 	    // TERCERA LINEA
 	    $this->Cell(90, 4, '', 0,0);
 	    // Título
-	    $this->Cell($this->_with_title, 4, ucwords($this->tipo), 0, 0, 'C');
+	    $this->Cell($this->_with_title, 4, strtoupper($this->tipo), 0, 0, 'C');
 	    // Movernos a la derecha
 	    $this->Cell(0, 4, '', 0,0);
 	    // Salto de línea
@@ -97,24 +99,33 @@ class EvaluationSheetPDF extends FPDF
 	    // CUARTA LINEA
 	    $this->SetFont('Arial','',$this->fontSizeHeader);
 	    // Movernos a la derecha
-	    $this->Cell(25, 4, '', 0,0);
+	    $this->Cell($this->_with_cellSpace, 4, '', 0,0);
 	    $this->Cell($this->_with_gr, 4, 'GRUPO: '.$this->infoGroupAndAsig['nombre_grupo'], 0, 0, 'L');
 	    // Título
-	    $this->Cell($this->_with_DR,4, ' DIRECTOR DE GRUPO: '.$this->infoGroupAndAsig['director_grupo'], 0, 0, 'C');
+	    $this->Cell($this->_with_DR,4, 'DIRECTOR DE GRUPO: '.
+					$this->infoGroupAndAsig['dir_primer_nomb']." ".
+	    			$this->infoGroupAndAsig['dir_segundo_nomb']." ".
+	    			$this->infoGroupAndAsig['dir_primer_ape']." ".
+	    			$this->infoGroupAndAsig['dir_segundo_ape'], 0, 0, 'L');
 	    // Movernos a la derecha
-	    $this->Cell(0, 4, 'FECHA: _____________', 0,0);
+	    $this->Cell(0, 4, 'FECHA: ___________', 0,0,'L');
 	    // Salto de línea
 	    $this->Ln(4);
 
 	    // QUINTA LINEA
 	    // Movernos a la derecha
-	    $this->Cell(25, 4, '', 0,0);
+	    $this->Cell($this->_with_cellSpace, 4, '', 0,0);
 	    $this->Cell($this->_with_gr, 4, substr('ASIGNATURA: '.$this->infoGroupAndAsig['asignatura'], 0,35), 0,0);
 	    // $this->Cell(65, 4, 'ASIGNATURA: '.$this->infoGroupAndAsig['asignatura'], 0, 0, 'L');
 	    // Título
-	    $this->Cell($this->_with_DR,4, 'DOCENTE: '.$this->infoGroupAndAsig['docente'], 0, 0, 'C');
+	    $this->Cell($this->_with_DR,4, 'DOCENTE: '.
+					$this->infoGroupAndAsig['doc_primer_nomb']." ".
+	    			$this->infoGroupAndAsig['doc_segundo_nomb']." ".
+	    			$this->infoGroupAndAsig['doc_primer_ape']." ".
+	    			$this->infoGroupAndAsig['doc_segundo_ape'], 0, 0, 'L');
+		
 	    // Movernos a la derecha
-	    $this->Cell(0, 4, utf8_decode('AÑO LECTIVO ').date('Y'), 0,0);
+	    $this->Cell(0, 4, utf8_decode('AÑO LECTIVO ').date('Y'), 0,0,'L');
 	    // Salto de línea
 	    $this->Ln(8);
 
@@ -145,7 +156,7 @@ class EvaluationSheetPDF extends FPDF
 
 		if($this->DefOrientation == 'P')
 	    {	
-	    	$this->_with_C_S = 88;
+	    	$this->_with_C_S = 80;
 	    }
 	}
 	private function _header()
@@ -158,11 +169,12 @@ class EvaluationSheetPDF extends FPDF
 		// 
 		$this->Cell( ( ($this->_with_C_N_E_P * 2 ) + ($this->_with_C_N_E_P * $this->maxPeriod) + $this->_with_C_S) , 4, '', 1,0, 'C', true);
 
+		// Recorremos los parametros de evaluacion
 		foreach ($this->evaluation_parameters as $key => $value) {
 
-            if($value['id_parametro_evaluacion'] == 4)
+            if($value['parametro'] == 'AEE')
             {
-            	$this->Cell($this->_with_A_E, 4, (ucwords($value['parametro'])), 1,0, 'C', true);
+            $this->Cell($this->_with_A_E, 4, (ucwords($value['parametro'])), 1,0, 'C', true);
             }
             else{
 
@@ -170,7 +182,7 @@ class EvaluationSheetPDF extends FPDF
             }
         }
 
-		$this->Cell(0, 8, 'Val', 1,0, 'C', true);
+		$this->Cell(0, 8, 'Val', 1,0, 'C', true); //Cambio alto 8
 
 		$this->Ln(4);
 
@@ -192,17 +204,17 @@ class EvaluationSheetPDF extends FPDF
 			if(count($value['indicadores']) == 0)
 			{
 				for ($i=0; $i < 5; $i++) { 
-					$this->Cell( $this->_with_C_H / 5 , 4, $value['id_parametro_evaluacion'], 1,0, 'C', true);
+					$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', true);
 				}
 			}
 			foreach ($value['indicadores'] as $keyInd => $valueInd) {
 
-				 if($value['id_parametro'] == 4)
+				 if($value['parametro'] == 'AEE')
             	{
             		$this->Cell( $this->_with_A_E , 4, $valueInd['abreviacion'], 1,0, 'C', true);	
             	}else
             	{
-            		$this->Cell( $this->_with_C_H / 5 , 4, $valueInd['abreviacion'], 1,0, 'C', true);	
+            		$this->Cell( $this->_with_C_H / count($value['indicadores']) , 4, $valueInd['abreviacion'], 1,0, 'C', true); //Cambio $this->_with_C_H / 5	
             	}
 			}
 		}
@@ -241,8 +253,12 @@ class EvaluationSheetPDF extends FPDF
 				// Se imprime la celda de la novedad
 				$this->Cell($this->_with_C_N_E_P, 4, '', 1, 0, 'C', false);
 				// Se imprime el status
-				$this->Cell($this->_with_C_N_E_P, 4, $value['estatus'], 1, 0, 'C', false);
-
+				
+				if($value['estatus'] != 'C'){
+					$this->Cell($this->_with_C_N_E_P, 4, $value['estatus'], 1, 0, 'C', false);
+				}else{
+					$this->Cell($this->_with_C_N_E_P, 4, '', 1, 0, 'C', false);
+				}
 				// Recorremos los periodos del estudiante
 				for ($i=0; $i < $this->maxPeriod; $i++) {
 

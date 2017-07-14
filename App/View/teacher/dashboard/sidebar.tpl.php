@@ -18,31 +18,13 @@
 			<span class="hidden-sm hidden-xs">Evaluación</span>
 		</a>
 	</li>
-	<!-- <li>
-		<a href="#collapse-period" data-toggle="collapse" arial-controls="collapse-period">
-			<span class="fa fa-check" aria-hidden="true"></span>
-			<span class="hidden-sm hidden-xs">Evaluación</span>
-		</a>
-		<ul class="collapse collapseable" id="collapse-period">
-			<li><a href="">Evaluar Periodo</a></li>
-			<li><a href="">Actividades de Evaluación</a></li>
-			<li><a href="">Evaluaciones Pendientes</a></li>
-			<li><a href="">Superaciones</a></li>
-			<li><a href="">Observaciones Generales</a></li>
-			<li><a href="">Informe General del Periodo</a></li>	
-		</ul>
-	</li> -->
 
 	<!-- Planilla -->
 	<li>
-		<a href="#collapse-sheet" data-toggle="collapse" arial-controls="collapse-sheet">
+		<a href="/teacher/sheets">
 			<span class="fa fa-file-text-o" aria-hidden="true"></span>
 			<span class="hidden-sm hidden-xs">Planillas</span>
 		</a>
-		<ul class="collapse collapseable" id="collapse-sheet">
-			<li><a href="">Asistencia</a></li>
-			<li><a href="">Evaluación</a></li>
-		</ul>
 	</li>
 
 	<!-- Evaluacion -->

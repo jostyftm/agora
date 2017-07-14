@@ -1,18 +1,17 @@
 <div class="row" >
 	<div class="col-md-12 content">
 	<div class="panel panel-default">
-	  	<div class="panel-heading">
-	    	<h3 class="panel-title"><?php echo $tittle_panel; ?></h3>
-	  	</div>
+	  	<!-- <div class="panel-heading">
+	    	<h3 class="panel-title"></h3>
+	  	</div> -->
 	  	<div class="panel-body">
 	    	<table class="table" id="tabla">
 	    		<thead>
 	    			<tr>
 	    				<th>N°</th>
+	    				<th>Grupo</th>
 		               <th>Asignatura</th>
-		               <th>Grupo</th>
-		               <th>Evaluación</th>
-		               <th>Superaciones</th>
+		               <th></th>
 	    			</tr>
 	    		</thead>
 	    		<tbody>
@@ -20,8 +19,8 @@
 	    				foreach($groupsAndAsign  as $key => $group){
 		               	echo "<tr>
 		                        <td>".($key+1)."</td>
-		                        <td>".utf8_encode($group['asignatura'])."</td>
 		                        <td>".utf8_encode($group['nombre_grupo'])."</td>
+		                        <td>".utf8_encode($group['asignatura'])."</td>
 		                        <td>
 		                           <div class='btn-group' role='group'>
 		                              	<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
@@ -29,13 +28,24 @@
 		                                 <span class='caret'></span>
 		                             	</button>
 		                           		<ul class='dropdown-menu'>
-		                           			<li><a href='#' data-request='spa'>Evaluar</a></li>
-		                               		<li><a href='/teacher/showFormEvaluatePeriod' data-asignature='".$group['id_asignatura']."' data-group='".$group['id_grupo']."' data-request='spa'>Evaluar Periodo Pendiente</a></li>
+		                           			<li>
+		                           				<a href='#' data-request='spa'>Evaluar Periodo
+				                        		</a>
+		                           			</li>
+				                        	<li>
+					                        	<a href='#' data-request='spa'>Superaciones
+					                        	</a>
+				                        	</li>
+				                        	<li>
+				                        		<a href='/teacher/showFormEvaluatePeriod' data-asignature='".$group['id_asignatura']."' data-group='".$group['id_grupo']."' data-request='spa'>Evaluar Periodo Pendiente
+				                        		</a>
+				                        	</li>
+				                        	<li>
+				                        		<a >Refuerzo Academico
+				                        		</a>
+				                        	</li>
 		                              	</ul>
 		                          	</div>
-		                        </td>
-		                        <td>
-		                        	<a href='#' data-request='spa' class='btn btn-primary'>Superaciones</a>
 		                        </td>
 		                     </tr>";
 		               }

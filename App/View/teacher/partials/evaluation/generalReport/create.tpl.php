@@ -4,11 +4,11 @@
 		  	<div class="panel-heading clearfix">
 		    	<h3 class="panel-title pull-left"><?php echo $tittle_panel; ?></h3>
 		    	<?php if(isset($back) && $back != NULL): ?>
-	    			<a class="btn btn-primary pull-right" href="<?php echo $back; ?>" data-request="spa">Atras</a>
+	    			<a class="btn btn-primary pull-right" href="<?php echo $back; ?>" data-request="backHistory">Atras</a>
 	    		<?php endif;?>
 		  	</div>
 		  	<div class="panel-body">
-		  		<form action="/teacher/saveGeneralObservation" method="POST" id="saveGeneralReport" enctype="application/x-www-form-urlencoded">
+		  		<form action="/generalReportPeriod/store" method="POST" id="saveGeneralReportPeriod" enctype="application/x-www-form-urlencoded">
 			  		<div class="row">
 			  			<div class="col-md-offset-2 col-md-4">
 			  				<div class="form-group">
@@ -24,7 +24,7 @@
 			  			<div class="col-md-3">
 			  				<div class="form-group">
 			  					<label for="Periodo">Periodo</label>
-			  					<select name="periodo" id="" class="form-control">
+			  					<select name="period" id="period" class="form-control">
 			  						<option value="">- Seleccione un periodo -</option>
 			  						<?php foreach($periods as $key => $period): ?>
 										<option value="<?php echo $period['periodos'];?>"><?php echo $period['periodos']; ?></option>
@@ -52,13 +52,13 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-md-offset-2 col-md-7">
+						<div class="col-md-12">
 							<div class="form-group">
 								<label for="">Descripción</label>
-								<textarea class="form-control" rows="5" name="description"></textarea>
+								<textarea class="form-control" id="id_textReport" rows="10" name="description"></textarea>
 							</div>
 							<div class="form-group text-center">
-								<button class="btn btn-primary">Crear Observacion General</button>
+								<button class="btn btn-primary">Crear Informe General de Periodo</button>
 							</div>
 						</div>
 					</div>
@@ -67,10 +67,12 @@
 		</div>
 	</div>
 </div>
-
+<script src="/Public/plugin/ckeditor/ckeditor.js"></script>
 <script>
 	$(document).ready(function(){
    		
+   		CKEDITOR.replace( 'id_textReport' );
+
    		// Ajax para el select
    		$('#selectGroup').change(function(){
    			$.ajax({
@@ -99,16 +101,28 @@
 		});
 
 		// Guardar dinamicamente
-		$("#saveGeneralReport").submit(function(e){
-			var form = $("#saveGeneralReport");
+		$("#saveGeneralReportPeriod").submit(function(e){
+			e.preventDefault();
+
+			var form = $("#saveGeneralReportPeriod");
 			
+			var students = $("#selectClassRoom_to").val(),
+				group = $("#selectGroup").val(),
+				period = $("#period").val(),
+				observation = CKEDITOR.instances.id_textReport.getData();
+
 			$.ajax({
 				type: form.attr('method'),
 				url: form.attr('action'),
-				// dataType: 'json',
-				data: form.serialize(),
+				dataType: 'json',
+				data: {
+					students,
+					group,
+					period,
+					observation
+				},
 				success: function(data){
-					console.log(data);
+					$('[data-request="backHistory"]').click();
 				},
 				error(xhr, estado){
 	                console.log(xhr);
@@ -116,42 +130,38 @@
 	         	}
 			});
 
-			return false;
 		});
 
 		// 
 		// Peticiones para los enlaces
-		$('[data-request="spa"]').each(function(){
-			// 
-			$(this).click(function(e){
-				// Se Previene el redireccionamiento
-				e.preventDefault();
-				var that = $(this);
-				$.ajax({
-					type: 'GET',
-					url: that.attr('href'),
-					dataType: 'html',
-					beforeSend: function(xhr){
-						$("#content").empty().append(
-							$('<div>', {class: 'col-md-12 content'}).append(
-								$('<div>', {class: 'panel panel-default panel-loading text-center'}).append(
-									$('<div>', {class: 'panel-body'}).append(
-										$('<div>', {class: 'fa fa-spinner fa-spin fa-3x fa-fw'}),
-										$('<span>Cargando...</span>')
-									)
+		$('[data-request="backHistory"]').click(function(e){
+			// Se Previene el redireccionamiento
+			e.preventDefault();
+			var that = $(this);
+			$.ajax({
+				type: 'GET',
+				url: that.attr('href'),
+				dataType: 'html',
+				beforeSend: function(xhr){
+					$("#content").empty().append(
+						$('<div>', {class: 'col-md-12 content'}).append(
+							$('<div>', {class: 'panel panel-default panel-loading text-center'}).append(
+								$('<div>', {class: 'panel-body'}).append(
+									$('<div>', {class: 'fa fa-spinner fa-spin fa-3x fa-fw'}),
+									$('<span>Cargando...</span>')
 								)
 							)
-						);
-					},
-					success: function(data){
-						$("#content").empty().append(data);
-					},
-					error(xhr, estado){
-	                	console.log(xhr);
-	                  	console.log(estado);
-	               	}
-				});
-			})
+						)
+					);
+				},
+				success: function(data){
+					$("#content").empty().append(data);
+				},
+				error(xhr, estado){
+	               	console.log(xhr);
+	               	console.log(estado);
+	           	}
+			});
 		});
    	});
 </script>

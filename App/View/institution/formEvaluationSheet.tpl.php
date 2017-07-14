@@ -162,7 +162,7 @@
 	            });
    			});
 
-   			// 
+   			// MULTISELECT
    			$('#selectAsignatures').multiselect({
 				search: {
 				 

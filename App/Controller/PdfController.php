@@ -41,10 +41,9 @@ class PdfController
 		$infoAsignatureAndGroup = $teacher->getInfoAsignatureAndGroup($id_asignature, $id_group)['data'][0];
 		$classRoomList = $group->getClassRoomList($id_group)['data'];
 
-		// print_r($classRoomList);
+		
 		$pdf->institution = $infoIns;
 		$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-		$pdf->SetMargins(3, 3, 3);
 		$pdf->AddPage();
 		$pdf->showData($classRoomList);
 		$pdf->SetFont('Arial','B',16);
@@ -52,46 +51,9 @@ class PdfController
 
 	}
 
-	public function evaluationSheetAction(
-		$db='', 
-		$maxPeriod, 
-		$id_asignature, 
-		$id_group
-	){
-		$teacher = new Teacher(DB);
-		$evaluation = new Evaluation(DB);
-		$performance = new Performance(DB);
-		$institution = new Institution(DB);
-		$pdf = new EvaluationSheetPDF('landscape', 'mm', 'A4');
-
-		// Parametros de evaluacion
-		$evaluation_parameters = $performance->getEvaluationParameters()['data'];
-		$ind_DC = $performance->getPerformanceIndicators(1)['data'];
-		$ind_DP = $performance->getPerformanceIndicators(2)['data'];
-		$ind_DS = $performance->getPerformanceIndicators(3)['data'];
-
-		// Informacion de la institucion, salon de clase y el grupo
-		$infoIns = $institution->getInfo()['data'][0];
-		$infoAsignatureAndGroup = $teacher->getInfoAsignatureAndGroup($id_asignature, $id_group)['data'][0];
-
-		$resp = $evaluation->getPeriods(
-					split('_', $maxPeriod)[1],
-					$id_asignature,
-					$id_group
-				)['data'];
-
-		print_r($resp);
-		// $pdf->maxPeriod = split('_', $maxPeriod)[1];
-		// $pdf->institution = $infoIns;
-		// $pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-		// $pdf->evaluation_parameters = $evaluation_parameters;
-		// $pdf->DC = $ind_DC;
-		// $pdf->DP = $ind_DP;
-		// $pdf->DS = $ind_DS;
-		// $pdf->AddPage();
-		// $pdf->showData($resp);
-		// $pdf->SetFont('Arial','B',16);
-		// $pdf->Output('pdf/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'I');
+	public function evaluationSheetAction(/*$maxPeriod, $id_asignature, $id_group*/)
+	{
+		print_r($_GET);
 	}
 
 	// Cambio
@@ -267,19 +229,18 @@ class PdfController
 							split('_', $_POST['periodo'])[1],
 							$id_asignature,
 							$id_group
-						);
+						)['data'];
 
 
-				print_r($resp);
-				// $pdf->maxPeriod = split('_', $_POST['periodo'])[1];
-				// $pdf->evaluation_parameters = $evaluation_parameters;
-				// $pdf->institution = $infoIns;
-				// $pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-				// $pdf->AddPage();
-				// $pdf->showData($resp);
-				// $pdf->Output($path.'/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'F');
+				$pdf->maxPeriod = split('_', $_POST['periodo'])[1];
+				$pdf->evaluation_parameters = $evaluation_parameters;
+				$pdf->institution = $infoIns;
+				$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
+				$pdf->AddPage();
+				$pdf->showData($resp);
+				$pdf->Output($path.'/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'-'.$pdf->infoGroupAndAsig['asignatura'].'.pdf', 'F');
 			}
-			// $this->mergePDF($path, $_POST['opcion']['orientacion']);
+			$this->mergePDF($path, $_POST['opcion']['orientacion']);
 		}
 	}
 }

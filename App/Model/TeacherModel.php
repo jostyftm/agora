@@ -88,35 +88,18 @@ class TeacherModel extends DB
 						INNER JOIN students s ON ogp.id_estudiante=s.idstudents 
 						INNER JOIN t_grupos g ON ogp.id_grupo=g.id_grupo 
 						WHERE ogp.id_director_grupo={$id_teacher}
-						ORDER BY p_n_alu";
+						ORDER BY p_a_alu";
 
 		return $this->getResultsFromQuery();
 	}
 
-	/*
-	 *	Funcion que devuelve las observaciones generales
-	 *
-	 * @param $id_teacher
-	 * @return result query
-	*/
-	public function getGeneralReportPeriod($id_teacher)
-	{
-		$this->query = "SELECT s.idstudents, s.primer_apellido AS p_a_alu, s.segundo_apellido AS s_a_alu, s.primer_nombre AS p_n_alu, s.segundo_nombre AS s_n_alu, igp.id_periodo, igp.observaciones,g.nombre_grupo 
-						FROM informe_general_periodo igp 
-						INNER JOIN students s ON igp.id_estudiante=s.idstudents 
-						INNER JOIN t_grupos g ON igp.id_grupo=g.id_grupo 
-						WHERE igp.id_director_grupo={$id_teacher}
-						ORDER BY p_n_alu";
-
-		return $this->getResultsFromQuery();
-	}
 
 
 
 
 
 	public function getInfoAsignatureAndGroup($id_asignature, $id_group){
-		$this->query = "SELECT CONCAT(d.primer_apellido,' ',d.segundo_apellido,' ',d.primer_nombre,' ',d.segundo_nombre) AS docente, CONCAT(dir.primer_apellido,' ', dir.segundo_apellido,' ',dir.segundo_nombre,' ',dir.primer_nombre,' ',dir.segundo_nombre) AS director_grupo, a.id_asignatura, a.asignatura, g.id_grupo, g.nombre_grupo, s.sede, j.jornada
+		$this->query = "SELECT d.primer_apellido AS doc_primer_ape, d.segundo_apellido AS doc_segundo_ape, d.primer_nombre AS doc_primer_nomb, d.segundo_nombre AS doc_segundo_nomb, dir.primer_apellido AS dir_primer_ape, dir.segundo_apellido AS dir_segundo_ape, dir.primer_nombre AS dir_primer_nomb, dir.segundo_nombre AS dir_segundo_nomb, a.id_asignatura, a.asignatura, g.id_grupo, g.nombre_grupo, s.sede, j.jornada
 						FROM docentes d
 						INNER JOIN grupo_x_asig_x_doce ad ON d.id_docente=ad.id_docente
 						INNER JOIN t_asignaturas a ON ad.id_asignatura=a.id_asignatura
