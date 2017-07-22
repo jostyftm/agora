@@ -8,6 +8,7 @@
 	define('DB', 'agoranet_ieag');
 	// define('DB', 'agoranet_simonb');
 	// define('DB', 'agoranet_jjrondon');
+	// define('DB', 'agoranet_ipec');
 	
 	define("TC", 42);
 	define("pb", '/Public/');

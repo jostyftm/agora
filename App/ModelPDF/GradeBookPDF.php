@@ -14,8 +14,8 @@ class GradeBookPDF extends FPDF
 	public $model = '';
 	public $date = '';
 	public $maxPeriod = 0;
-	public $periods = array();
 	public $areas = array();
+	public $periods = array();
 	public $calAreas = array();
 	public $gradeBook = array();
 	public $valoration = array();
@@ -28,10 +28,12 @@ class GradeBookPDF extends FPDF
 	private $_prefixValoration = 'valoracion';
 
 	public $Impescala = false;
+	public $perdioFace = false;
 	public $ImpDobleCara = false;
 	public $AreasDisable = false;
 	public $DesemDisable = false;
 	public $DoceDisabled = false;
+	public $CombinedEvaluation = false;
 
 	private $_h_c = 4;
 
@@ -133,8 +135,10 @@ class GradeBookPDF extends FPDF
 		// 
 		$this->Cell(0, $this->_h_c, '', 'T',0, 'C');
 
-		// Creamos la tabla con las notas
-		$this->createTableDetail();
+		if($this->CombinedEvaluation):
+			// Creamos la tabla con las notas
+			$this->createTableDetail();
+		endif;
 
 		// LastConfig
 		$this->LastConfig();
@@ -145,9 +149,10 @@ class GradeBookPDF extends FPDF
 
 	private function config()
 	{
-		if($this->infoGroupAndAsig['id_grado'] == 4)
+		if($this->infoGroupAndAsig['id_grado'] == 4 && $this->institution['cod_dane'] == 176109003183)
 			$this->_prefixValoration = 'valoracion_trans';
 	}
+
 	private function createDetailBook()
 	{
 
@@ -181,7 +186,7 @@ class GradeBookPDF extends FPDF
 					// Funcion para obtener la valoracion
 					$valoracionA = $this->getPrefixValoration($nArea);
 							
-					$this->Cell(0, $this->_h_c, $valoracionA, 'TBR', 0, 'C', true);
+					$this->Cell(0, $this->_h_c, strtoupper($valoracionA), 'TBR', 0, 'C', true);
 				}else{
 					$this->Cell(0, $this->_h_c, utf8_decode($value), 1,0, 'L', true);
 				}
@@ -201,23 +206,27 @@ class GradeBookPDF extends FPDF
 						// Verificamos si la nota esta en 0
 						if($nota > 0): 
 							$this->SetFont('Arial','B',8);
-							$this->Cell(140, $this->_h_c, $value2['asignatura'], 'L',0, 'L');
-							$this->Cell(10, $this->_h_c, $value2['ihs'], 0,0, 'C');
+							// $this->Cell(140, $this->_h_c, $value2['asignatura'], 'L',0, 'L');
+							// $this->Cell(10, $this->_h_c, $value2['ihs'], 0,0, 'C');
+							$asignature = $value2['asignatura'];
+							$ihs = $value2['ihs'];
 
 							if(strlen($nota) > 1)
-								$this->Cell(17, $this->_h_c, $nota, 0,0, 'C');
+								$nota = $nota;
+								// $this->Cell(17, $this->_h_c, $nota, 0,0, 'C');
 							else
-								$this->Cell(17, $this->_h_c, $nota.'.0', 0,0, 'C');
+								$nota = $nota.'.0';
+
+							// 
+							// $this->Cell(17, $this->_h_c, $nota, 0,0, 'C');
 
 							// Funcion para obtener la valoracion
 							$prefixValoracion = $this->getPrefixValoration($nota);
 							// Valoracion para mostrar los desempeños
 							$valoracion = $this->getValoration($nota);
-							// 
-							$this->Cell(0, $this->_h_c, $prefixValoracion, 'R', 0, 'C');
 							
-
-							$this->Ln($this->_h_c);
+							// Mostramos la valoracion
+							$this->showValoration($asignature, $ihs, $nota, $prefixValoracion);
 
 							// Desempeño por los indicadores
 							$this->SetFont('Arial','',8);
@@ -235,6 +244,35 @@ class GradeBookPDF extends FPDF
 				}
 			}
 		}
+	}
+
+	private function showValoration($asignature='', $ihs='', $val='', $valoration){
+
+		$pahtImage = "http://agora.dev/Public/img/";
+		$height = 0;
+
+		if($ihs == 0)
+			$ihs = '';
+		
+		if($this->perdioFace):
+			$height = 11;
+			$val = '';
+		else:
+			$height = $this->_h_c;
+		endif;
+
+		$this->Cell(140, $height, $asignature, 'L',0, 'L');
+		$this->Cell(10, $height, $ihs, 0,0, 'C');
+		$this->Cell(17, $height, $val, 0,0, 'C');
+
+		if($this->perdioFace):
+			$this->Image($pahtImage.strtolower($valoration).'.jpg', 185, $this->GetY()+1, 9, 9, 'JPG');
+			$this->Cell(0, $height, '', 'R', 0, 'C');
+		else:
+			$this->Cell(0, $this->_h_c, strtoupper($valoration), 'R', 0, 'C');
+		endif;
+
+		$this->Ln($height);
 	}
 
 	private function getPrefixValoration($note)
@@ -285,7 +323,7 @@ class GradeBookPDF extends FPDF
 		foreach ($this->performancesData as $keyD => $valueD) 
 		{
 			if(
-				$this->infoGroupAndAsig['id_grado'] == $valueD['id_grado'] &&
+				$this->infoGroupAndAsig['id_grupo'] == $valueD['id_grupo'] &&
 				$data_asignature['id_asignatura'] == $valueD['id_asignatura'] && $valueD['periodos'] == 1
 			):
 			

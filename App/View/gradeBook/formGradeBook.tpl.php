@@ -16,7 +16,7 @@
 						<h3 class="panel-title">Boletines de notas</h3>
 					</div>
 					<div class="panel-body">
-						<form action="/pdf/generateGradeBookByStudent" method="POST" enctype="application/x-www-form-urlencoded">
+						<form action="/pdf/generateGradeBookByStudent" method="POST" enctype="application/x-www-form-urlencoded" target="_blank">
 					    	<div class="row">
 					    		<div class="col-md-4">
 					    			<div class="form-group">
@@ -100,32 +100,45 @@
 					    	<div class="row">
 					    		<div class="col-md-12 text-center">
 					    			<div class="form-group text-center">
-					    				<label for="">Configuración del boletin</label>
+					    				<a class="#" role="button" data-toggle="collapse" href="#configGradeBook" aria-expanded="false" aria-controls="configGradeBook">
+					    					<i class="fa fa-plus"></i> 
+					    					Configuración del boletin
+					    				</a>
 					    			</div>
-					    			<div class="form-group">
-									    <label class="radio-inline">
-									    	<input type="checkbox" name="MosDoc" value="MosDoc"> Mostrar Docente
-									    </label>
-										<label class="radio-inline">
-									     	<input type="checkbox" name="escalaVAlorativa"> Escala Valorativa
-									    </label>
-									    <label class="radio-inline">
-									     	<input type="checkbox" name="MosDesem"> Mostra Desempeños
-									    </label>
-									    <label class="radio-inline">
-									     	<input type="checkbox" name="areasDisabled"> Desactivar Areas
-									    </label>
-									    <label class="radio-inline">
-									     	<input type="checkbox" name="debleCara"> Doble Cara
-									    </label>
-									    <label class="radio-inline">
-									     	<input type="checkbox" name="reportDisable"> Informe general del periodo
-									    </label>
+					    			<div id="configGradeBook" class="collapse">
+					    				<div class="form-group">
+										    <label class="radio-inline">
+										    	<input type="checkbox" name="MosDoc" value="MosDoc"> Mostrar Docente
+										    </label>
+											<label class="radio-inline">
+										     	<input type="checkbox" name="escalaVAlorativa"> Escala Valorativa
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="MosDesem"> Mostra Desempeños
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="areasDisabled"> Desactivar Areas
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="debleCara"> Doble Cara
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="reportDisable"> Informe general del periodo
+										    </label>
+						    			</div>
+						    			<div class="form-group">
+						    				<label class="radio-inline">
+										     	<input type="checkbox" name="periodFace"> Imprimir caritas
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="CombinedEvaluation" checked> Valoraciones Acomuladas
+										    </label>
+						    			</div>
 					    			</div>
 					    		</div>
 					    	</div>
 					    	<div class="form-group text-center">
-					    		<input type="hidden" name="db" value="<?php echo DB;?>">
+					    		<input type="hidden" id="db" name="db" value="<?php echo $db;?>">
 					    		<input type="submit" name="btn_p_superacion" class="btn btn-primary" value="Crear boletin">
 					    	</div>
 					    </form>
@@ -143,10 +156,11 @@
 
    			// 
    			$('#selectSede').change(function(){
+   				var db = $("#db").val();
    				$.ajax({
 	                type: "GET",
 	                dataType: "html",
-	                url: '/ajax/getGroups/'+this.value,
+	                url: '/ajax/getGroups/'+this.value+"/"+db,
 	                success: function(data){
 	                    $('#selectGrupo').empty();
 	                    $('#selectStudent').empty();
@@ -165,10 +179,11 @@
 
    			// 
    			$('#selectGrupo').change(function(){
+   				var db = $("#db").val();
    				$.ajax({
 	                type: "GET",
 	                dataType: "html",
-	                url: '/ajax/getStudents/'+this.value,
+	                url: '/ajax/getStudents/'+this.value+"/"+db,
 	                success: function(data){
 	                    $('#selectStudent').empty().append(data);
 	                },

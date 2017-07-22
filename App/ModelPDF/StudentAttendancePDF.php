@@ -12,9 +12,11 @@ class StudentAttendancePDF extends FPDF
 	public $tipo = 'Planilla de asistencia';
 	public $infoGroupAndAsig = array();
 	public $institution = array();
+	public $novelties = array();
+	private $_width_mark = 267;
 
-	private $_with_CE = 81;
-	private $_with_CD = 5.8;
+	private $_with_CE = 75;
+	private $_with_CD = 5.7;
 	function Header(){
 
 		if($this->institution['logo_byte'] != NULL)
@@ -28,7 +30,7 @@ class StudentAttendancePDF extends FPDF
 	    // Marca de agua
 
 	    //Marco
-	    $this->Cell(0, 24, '', 1,0);
+	    $this->Cell($this->_width_mark, 24, '', 1,0);
 	    $this->Ln(0);
 
 	    // PRIMERA LINEA
@@ -73,7 +75,7 @@ class StudentAttendancePDF extends FPDF
 			    			$this->infoGroupAndAsig['dir_primer_ape']." ".
 			    			$this->infoGroupAndAsig['dir_segundo_ape'], 0, 0, 'L');
 	    // Movernos a la derecha
-	    $this->Cell(0, 4, 'FECHA: ____________________', 0,0);
+	    $this->Cell(0, 4, 'FECHA: '.date('d-m-Y'), 0,0,'L');
 	    // Salto de línea
 	    $this->Ln(4);
 
@@ -135,35 +137,59 @@ class StudentAttendancePDF extends FPDF
 
 				if($clave < 9)
 				{
-					$this->Cell($this->_with_CE, 4, '0'.($clave+1).' '.utf8_encode(
+					$this->Cell($this->_with_CE, 4, '0'.($clave+1).' '.
 						$valor['primer_ape_alu'].' '.
 						$valor['segundo_ape_alu'].' '.
 						$valor['primer_nom_alu'].' '.
 						$valor['segundo_nom_alu']
-					), 1,0);	
+					, 1,0);	
 				}
 				else
 				{
-					$this->Cell($this->_with_CE, 4, ($clave+1).' '.utf8_encode(
+					$this->Cell($this->_with_CE, 4, ($clave+1).' '.
 						$valor['primer_ape_alu'].' '.
 						$valor['segundo_ape_alu'].' '.
 						$valor['primer_nom_alu'].' '.
 						$valor['segundo_nom_alu']
-					), 1,0);
+					, 1,0);
 				}
 				
-				$this->Cell(8, 4, '', 1, 0, 'C');
-				if($valor['estatus'] != 'C')
-					$this->Cell(8, 4, $valor['estatus'], 1, 0, 'C');
-				else
-					$this->Cell(8, 4, '', 1, 0, 'C');
+				// Mostramos la novedad
+				$this->showNovelty($valor['idstudents']);
+				
+				// Mostramos el estado
+				$this->showState($valor['estatus']);
+
+				
 
 				for ($i=0; $i < 31; $i++) { 
 					$this->Cell($this->_with_CD, 4, '', 1, 0, 'C');
 				}
+
 				$this->Ln(4);
 			}
 		}
 	} 
+
+	private function showNovelty($id_student)
+	{
+		$novelty = '';
+
+		foreach($this->novelties as $key => $value):
+			if($value['idstudents'] == $id_student):
+				$novelty = $value['abrev']; 				
+			endif;
+		endforeach;
+
+		$this->Cell(8, 4, $novelty, 1, 0, 'C');
+	}
+
+	private function showState($state)
+	{
+		if($state != 'C')
+			$this->Cell(8, 4, $state, 1, 0, 'C');
+		else
+			$this->Cell(8, 4, '', 1, 0, 'C');
+	}
 }
 ?>

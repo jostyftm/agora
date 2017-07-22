@@ -85,9 +85,10 @@ class AjaxController
 		$view->execute();
 	}
 
+	// Clase institution => archivo formGradeBook
 	public function getGroupsAction($id_sede, $db='')
 	{
-		$institution = new Institution(DB);
+		$institution = new Institution($db);
 
 		$groups = $institution->getGroups($id_sede)['data'];
 
@@ -96,9 +97,10 @@ class AjaxController
 		}
 	}
 
+	// Clase institution => archivo formGradeBook
 	public function getStudentsAction($id_group, $db='')
 	{
-		$group = new Group(DB);
+		$group = new Group($db);
 
 		$students = $group->getClassRoomList($id_group)['data'];
 
@@ -124,17 +126,7 @@ class AjaxController
 		{
 			echo "<option value='".$value['id_docente']."'>".utf8_encode(
 					 $value['segundo_apellido'].' '.$value['primer_apellido'].' '.$value['primer_nombre'].' '.$value['segundo_nombre'])."</option>";	
-		}
-			
-		// foreach ($docentes as $key => $value) 
-		// 	echo json_encode(
-		// 		array( 'data' => array(
-		// 			'id_docente' => $value['id_docente'],
-		// 			'docente'	=> $value['segundo_apellido'].' '.$value['primer_apellido'].' '.$value['primer_nombre'].' '.$value['segundo_nombre'],
-		// 			'id_sede'	=> $value['id_sede']
-		// 		))
-		// 	);
-		
+		}		
 	}
 
 	public function getAsignaturesByTeacherAction($db, $id_teacher)

@@ -29,33 +29,6 @@ class PdfController
 
 	}
 
-	// Planilla para la lista de asistencia
-	public function studentAttendanceAction($id_asignature, $id_group){
-
-		$group = new Group(DB);
-		$teacher = new Teacher(DB);
-		$institution = new Institution(DB);
-		$pdf = new PlanillaAsistencia('landscape', 'mm', 'A4');
-
-		$infoIns = $institution->getInfo()['data'][0];
-		$infoAsignatureAndGroup = $teacher->getInfoAsignatureAndGroup($id_asignature, $id_group)['data'][0];
-		$classRoomList = $group->getClassRoomList($id_group)['data'];
-
-		
-		$pdf->institution = $infoIns;
-		$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-		$pdf->AddPage();
-		$pdf->showData($classRoomList);
-		$pdf->SetFont('Arial','B',16);
-		$pdf->Output('pdf/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'.pdf', 'I');
-
-	}
-
-	public function evaluationSheetAction(/*$maxPeriod, $id_asignature, $id_group*/)
-	{
-		print_r($_GET);
-	}
-
 	// Cambio
 	private function generateGeneralPeriodReport($content, $path, $student=array(), $institution=array(), $group=array())
 	{
@@ -82,13 +55,15 @@ class PdfController
 		$infoIns = $institution->getInfo()['data'][0];
 		$periods = $institution->getPeriods()['data'];
 		$valoration = $evaluation->getValoration()['data'];
-		$path = './'.time();
+		
 
 
 		if(isset($_POST['btn_p_superacion']))
 		{
 			$infoGroup = $group->getInfo($_POST['grupo'])['data'][0];
 			$performances = $performance->getPerformanceByGroup($infoGroup['id_grupo'], 1)['data'];
+
+			$path = './'.time().'-'.$_POST['db'].'-boletin';
 
 			if(!file_exists($path))
 			{	
@@ -120,7 +95,7 @@ class PdfController
 
 				if($evaluation->decideGradeBook($gradeBook, 1))
 				{	
-					$pdf = new GradeBookPDF('P', 'mm', 'A4');
+					$pdf = new GradeBookPDF('P', 'mm', 'Letter');
 					$pdf->periods = $periods;
 
 					$pdf->institution = $infoIns;
@@ -129,6 +104,7 @@ class PdfController
 					$pdf->areas = $gradeBook['areas'];
 					$pdf->infoGroupAndAsig = $infoGroup;
 					$pdf->gradeBook = $gradeBook['data'];
+					
 					$pdf->performancesData = $performances;
 					$pdf->calAreas = $gradeBook['calAreas'];
 					$pdf->date = (isset($_POST['fecha']) && $_POST['fecha'] != '') ? date('d-m-Y', strtotime($_POST['fecha'])) : date('d-m-Y');
@@ -138,6 +114,8 @@ class PdfController
 					$pdf->AreasDisable = (isset($_POST['areasDisabled'])) ? true : false;
 					$pdf->DesemDisable = (isset($_POST['MosDesem'])) ? true : false;
 					$pdf->DoceDisabled = (isset($_POST['MosDoc'])) ? true : false;
+					$pdf->perdioFace = (isset($_POST['periodFace'])) ? true : false;
+					$pdf->CombinedEvaluation = (isset($_POST['CombinedEvaluation'])) ? true : false;
 
 					$pdf->createGradeBook();
 					$pdf->SetFont('Arial','B',16);
@@ -164,6 +142,8 @@ class PdfController
 			}
 		}
 
+		asort($files);
+		
 		foreach ($files as $file) 
 		{ 
 			$pageCount = $pdi->setSourceFile($path.'/'.$file); 
@@ -181,67 +161,6 @@ class PdfController
 		$buffer = $pdi->Output('I','merged.pdf');
 
 		system('rm -rf ' . escapeshellarg($path), $retval);
-	}
-
-	public function testPdfAction()
-	{
-		if(isset($_POST['btn_p_pe']))
-		{
-			$teacher = new Teacher($_POST['db']);
-			$evaluation = new Evaluation($_POST['db']);
-			$performance = new Performance($_POST['db']);
-			$institution = new Institution($_POST['db']);
-			
-			$path = './'.time();
-
-			$Resp_eP = $performance->getEvaluationParameters()['data'];
-			$evaluation_parameters = array();
-
-			foreach ($Resp_eP as $key => $value) 
-			{
-				array_push($evaluation_parameters, 
-					array(
-						'id_parametro' => $value['id_parametro_evaluacion'],
-						'parametro' => $value['parametro'],
-						'indicadores' => $performance->getPerformanceIndicators($value['id_parametro_evaluacion'])['data']
-					)
-				);
-			}
-
-			// Informacion de la institucion, salon de clase y el grupo
-			$infoIns = $institution->getInfo()['data'][0];
-
-			if(!file_exists($path))
-			{	
-				mkdir($path);
-			}
-
-			foreach ($_POST['grupos'] as $key => $value) 
-			{
-				$pdf = new EvaluationSheetPDF($_POST['opcion']['orientacion'], 'mm', $_POST['opcion']['papel']);
-				// $pdf = new EvaluationSheetPDF('L', 'mm', 'A4');
-				$id_asignature = split('-', $value)[0];
-				$id_group = split('-', $value)[1];
-			
-				$infoAsignatureAndGroup = $teacher->getInfoAsignatureAndGroup($id_asignature, $id_group)['data'][0];
-
-				$resp = $evaluation->getPeriods(
-							split('_', $_POST['periodo'])[1],
-							$id_asignature,
-							$id_group
-						)['data'];
-
-
-				$pdf->maxPeriod = split('_', $_POST['periodo'])[1];
-				$pdf->evaluation_parameters = $evaluation_parameters;
-				$pdf->institution = $infoIns;
-				$pdf->infoGroupAndAsig = $infoAsignatureAndGroup;
-				$pdf->AddPage();
-				$pdf->showData($resp);
-				$pdf->Output($path.'/lista-'.$pdf->infoGroupAndAsig['nombre_grupo'].'-'.$pdf->infoGroupAndAsig['asignatura'].'.pdf', 'F');
-			}
-			$this->mergePDF($path, $_POST['opcion']['orientacion']);
-		}
 	}
 }
 

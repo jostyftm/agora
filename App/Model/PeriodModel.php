@@ -17,7 +17,7 @@ class PeriodModel extends DB
 			parent::__construct($db);
 	}
 
-	public function getPeriods()
+	public function all()
 	{
 		$this->query = "SELECT * FROM {$this->table}";
 

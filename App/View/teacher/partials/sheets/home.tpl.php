@@ -7,7 +7,7 @@
 		  	<div class="panel-body">
 		  		<form action="" method="POST" id="formCreateSheets" enctype="application/x-www-form-urlencoded" target="_blank">
 			  		<div class="row">
-			  			<div class="col-md-offset-3 col-md-3">
+			  			<div class="col-md-3">
 			  				<div class="form-group">
 			  					<label for="">Tipo de planilla</label>
 			  					<select class="form-control" id="sheet" name="type_sheet">
@@ -28,6 +28,27 @@
 			  					</select>
 			  				</div>
 			  			</div>
+			  			<div class="col-md-3">
+							    	<div class="form-group">
+							    		<label for="">Diseño</label>
+							    		<select name="orientation" id="orientation" class="form-control" disabled>
+							    			<option value="l" selected="selected">Horizontal</option>
+							    			<option value="p">Vertical</option>
+							    		</select>
+							    	</div>
+					    		</div>
+								<div class="col-md-3">
+							    	<div class="form-group">
+							    		<label for="">Tamaño de página</label>
+							    		<select name="papper" id="" class="form-control">
+							    			<option value="A3">A3</option>
+							    			<option value="A4" selected="selected">A4</option>
+							    			<option value="A5">A5</option>
+							    			<option value="Letter">Letter</option>
+							    			<option value="Legal">Legal</option>
+							    		</select>
+							    	</div>
+					    		</div>
 			  		</div>
 			  		<div class="row">
 						<div class="col-md-5">
@@ -88,6 +109,7 @@
 			form.attr('action', url+this.value);
 
 			$("#btnCreate").prop('disabled', false);
+			$("#orientation").prop('disabled', true);
 			$("#period").prop('disabled', true);
 
 		}else if(this.value == 'Evaluation'){
@@ -95,6 +117,7 @@
 			form.attr('action', url+this.value);
 
 			$("#btnCreate").prop('disabled', false);
+			$("#orientation").prop('disabled', false);
 			$("#period").prop('disabled', false);
 		}
 	});
