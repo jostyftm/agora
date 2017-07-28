@@ -155,13 +155,18 @@ class EvaluationSheetPDF extends FPDF
 	    			$this->_with_C_H = 55;
 		    		$this->_with_C_S = 88;
 	    		}
-				// Para los que tienen 4 desempeño y existen AEE
-	    		else if(count($this->evaluation_parameters) == 4 && $this->fieldExists("AEE")){
-	    			$this->_with_C_H = 43;
-		    		$this->_with_C_S = 69;
-	    		}
 
 	    	}
+	   //  	if($this->maxPeriod == 3 &&
+	   //  		$this->fieldExists("AEE")){
+
+				// $this->_with_C_H = 55;
+		  //   	$this->_with_C_S = 88;
+	   //  	}else
+	   //  		if($this->maxPeriod == 4 && count($this->evaluation_parameters) == 4){
+	   //  			$this->_with_C_S = 70;
+	   //  			$this->_width_VG_VRA = 7;
+	   //  		}
 	    }	
 	}
 	private function _header()
@@ -210,11 +215,8 @@ class EvaluationSheetPDF extends FPDF
 			
 			if(count($value['indicadores']) == 0)
 			{
-				if($value['parametro'] != 'AEE')
-            	{
-					for ($i=0; $i < 5; $i++) { 
-						$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', true);
-					}
+				for ($i=0; $i < 5; $i++) { 
+					$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', true);
 				}
 			}
 			foreach ($value['indicadores'] as $keyInd => $valueInd) {
@@ -288,11 +290,8 @@ class EvaluationSheetPDF extends FPDF
 			
 					if(count($value['indicadores']) == 0)
 					{
-						if($value['parametro'] != 'AEE')
-		            	{
-							for ($i=0; $i < 5; $i++) { 
-								$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', false);
-							}
+						for ($i=0; $i < 5; $i++) { 
+							$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', false);
 						}
 					}
 					foreach ($value['indicadores'] as $keyInd => $valueInd) {

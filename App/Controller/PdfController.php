@@ -45,23 +45,28 @@ class PdfController
 
 	public function generateGradeBookByStudentAction()
 	{	
-		$group = new Group(DB);
-		$student = new Student(DB);
-		$report = new ReportPeriod(DB);
-		$evaluation = new Evaluation(DB);
-		$performance = new Performance(DB);
-		$institution = new Institution(DB);
-		
-		$infoIns = $institution->getInfo()['data'][0];
-		$periods = $institution->getPeriods()['data'];
-		$valoration = $evaluation->getValoration()['data'];
-		
-
-
 		if(isset($_POST['btn_p_superacion']))
 		{
+			// 
+			$group = new Group($_POST['db']);
+			$student = new Student($_POST['db']);
+			$report = new ReportPeriod($_POST['db']);
+			$evaluation = new Evaluation($_POST['db']);
+			$performance = new Performance($_POST['db']);
+			$institution = new Institution($_POST['db']);
+			
+			$infoIns = $institution->getInfo()['data'][0];
+			$periods = $institution->getPeriods()['data'];
+			$valoration = $evaluation->getValoration()['data'];
+
+			// 
 			$infoGroup = $group->getInfo($_POST['grupo'])['data'][0];
 			$performances = $performance->getPerformanceByGroup($infoGroup['id_grupo'], 1)['data'];
+
+			$positions = $evaluation->getPositionGradeBook(
+				1,
+				$_POST['grupo']
+			);
 
 			$path = './'.time().'-'.$_POST['db'].'-boletin';
 
@@ -104,7 +109,7 @@ class PdfController
 					$pdf->areas = $gradeBook['areas'];
 					$pdf->infoGroupAndAsig = $infoGroup;
 					$pdf->gradeBook = $gradeBook['data'];
-					
+					$pdf->positions = $positions;
 					$pdf->performancesData = $performances;
 					$pdf->calAreas = $gradeBook['calAreas'];
 					$pdf->date = (isset($_POST['fecha']) && $_POST['fecha'] != '') ? date('d-m-Y', strtotime($_POST['fecha'])) : date('d-m-Y');

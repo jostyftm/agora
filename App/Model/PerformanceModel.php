@@ -54,10 +54,11 @@ class PerformanceModel extends DB
 
 	public function getPerformanceByGroup($id_group, $period)
 	{
-		$this->query = "SELECT dp.posicion, dp.id_grupo, d.*
+		$this->query = "SELECT DISTINCT d.*, dp.posicion, dp.id_grupo
 						FROM rel_desemp_posicion dp
 						INNER JOIN desempeno d ON dp.cod_desemp=d.codigo
-						WHERE dp.id_grupo={$id_group} AND d.periodos ={$period}";
+						WHERE dp.id_grupo={$id_group} AND d.periodos ={$period}
+						ORDER BY d.codigo";
 
 		return $this->getResultsFromQuery();
 	}

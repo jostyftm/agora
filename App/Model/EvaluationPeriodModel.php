@@ -189,29 +189,87 @@ class EvaluationPeriodModel extends DB
 		return true;
 	}
 
-	public function orderBestPerformancesByGroup($id_grade='', $id_group='')
+	public function getBetterAverages($period='', $id_group='')
 	{
-		$this->query = "
-		SELECT  t_evaluacion.primer_apellido, t_evaluacion.primer_nombre,  
-		sum(t_evaluacion.eval_1_per >= (SELECT minimo from valoracion WHERE valoracion = 'Superior') and t_evaluacion.eval_1_per <=(SELECT maximo from valoracion WHERE valoracion = 'Superior'))   as S ,
-		sum(t_evaluacion.eval_1_per >=  (SELECT minimo from valoracion WHERE valoracion = 'Alto') and t_evaluacion.eval_1_per <= (SELECT maximo from valoracion WHERE valoracion = 'Alto')) as A ,
-		sum(t_evaluacion.eval_1_per >= (SELECT minimo from valoracion WHERE valoracion = 'Basico') and t_evaluacion.eval_1_per <=(SELECT maximo from valoracion WHERE valoracion = 'Basico')) as B , 
-		sum(t_evaluacion.eval_1_per <= (SELECT maximo from valoracion WHERE valoracion = 'Bajo') ) as V ,
-		count(t_evaluacion.eval_1_per>0) as TAV,  
-		ROUND(((SUM(t_evaluacion.eval_1_per)) / count(t_evaluacion.eval_1_per)),1) as Promedio,
+		$this->query = "SELECT  t_evaluacion.id_estudiante, t_evaluacion.primer_apellido, t_evaluacion.segundo_apellido, t_evaluacion.segundo_nombre, t_evaluacion.primer_nombre,  
+		sum(t_evaluacion.eval_{$period}_per >= (SELECT minimo from valoracion WHERE valoracion = 'Superior') and t_evaluacion.eval_{$period}_per <=(SELECT maximo from valoracion WHERE valoracion = 'Superior'))   as S ,
+		sum(t_evaluacion.eval_{$period}_per >=  (SELECT minimo from valoracion WHERE valoracion = 'Alto') and t_evaluacion.eval_{$period}_per <= (SELECT maximo from valoracion WHERE valoracion = 'Alto')) as A ,
+		sum(t_evaluacion.eval_{$period}_per >= (SELECT minimo from valoracion WHERE valoracion = 'Basico') and t_evaluacion.eval_{$period}_per <=(SELECT maximo from valoracion WHERE valoracion = 'Basico')) as B , 
+		sum(t_evaluacion.eval_{$period}_per <= (SELECT maximo from valoracion WHERE valoracion = 'Bajo') ) as V ,
+		sum(t_evaluacion.eval_{$period}_per>(SELECT minimo from valoracion where valoracion = 'Bajo')) as TAV,  
+		ROUND(((SUM(t_evaluacion.eval_{$period}_per)) / count(t_evaluacion.eval_{$period}_per)),1) as Promedio,
+		ROUND((sum(t_evaluacion.eval_{$period}_per) / SUM(eval_{$period}_per > (SELECT minimo from valoracion where valoracion = 'Bajo'))),1) as pgg,
 		(SELECT valoracion.val FROM valoracion WHERE 
-		ROUND(((SUM(t_evaluacion.eval_1_per)) / count(t_evaluacion.eval_1_per)),1)
-		BETWEEN   valoracion.minimo AND  valoracion.maximo) as Desempeño
+		ROUND(((SUM(t_evaluacion.eval_{$period}_per)) / count(t_evaluacion.eval_{$period}_per)),1)
+		BETWEEN   valoracion.minimo AND  valoracion.maximo) as Desempeno
 		FROM t_evaluacion
 		WHERE t_evaluacion.id_estudiante IN
 		(SELECT DISTINCT
 		t_evaluacion.id_estudiante
 		FROM t_evaluacion
 		INNER JOIN t_asignatura_x_area ON t_asignatura_x_area.id_area  = t_evaluacion.id_area
-		and t_asignatura_x_area.id_asignatura = t_evaluacion.id_asignatura 
-		INNER JOIN t_grados ON t_evaluacion.id_grado = t_grados.id_grado and t_grados.id_grado = 15 and t_evaluacion.id_grupo = 19)
-		GROUP BY t_evaluacion.id_estudiante ORDER BY Promedio DESC;	
-		";
+		and t_asignatura_x_area.id_asignatura = t_evaluacion.id_asignatura
+		INNER JOIN t_grados ON t_evaluacion.id_grado = t_grados.id_grado and t_evaluacion.id_grupo = '{$id_group}' and t_evaluacion.eval_{$period}_per >= (SELECT minimo from valoracion where valoracion = 'Bajo') ) 
+		GROUP BY t_evaluacion.id_estudiante ORDER BY  Tav DESC , Promedio DESC ;";
+
+		return $this->getResultsFromQuery();
+	}
+
+	public function getPositionGradeBook($period='', $id_group=''){
+
+		$resp = $this->getBetterAverages($period, $id_group);
+
+		$puestos = array();
+
+		if($resp['state']):
+			$position = 1;
+			$pggAux = 0;
+
+			$students = $resp['data'];
+
+			foreach($students as $student){
+
+				if($student['pgg'] > $pggAux){
+					$pggAux = $student['pgg'];
+					array_push(
+						$puestos,
+						array(
+							'id_student'	=>	$student['id_estudiante'],
+							'period'		=>	$period,
+							'position'		=>	$position,
+							'pgg'			=>	$student['pgg']
+						)
+					);
+					$position++;
+
+				}else if($student['pgg'] == $pggAux){
+					array_push(
+						$puestos,
+						array(
+							'id_student'	=>	$student['id_estudiante'],
+							'period'		=>	$period,
+							'position'		=>	$position-1,
+							'pgg'			=>	$student['pgg']
+						)
+					);
+
+				}else{
+					$pggAux = $student['pgg'];
+					array_push(
+						$puestos,
+						array(
+							'id_student'	=>	$student['id_estudiante'],
+							'period'		=>	$period,
+							'position'		=>	$position,
+							'pgg'			=>	$student['pgg']
+						)
+					);
+					$position++;
+				}
+			}
+		endif;
+
+		return $puestos;
 	}
 }
 ?>
