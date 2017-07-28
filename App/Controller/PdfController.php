@@ -68,6 +68,9 @@ class PdfController
 				$_POST['grupo']
 			);
 
+			// foreach($evaluation->getAllPositions($_POST['grupo']) as $key => $value):
+			// 	print_r($value); echo "<br /><br /><br />";
+			// endforeach;  
 			$path = './'.time().'-'.$_POST['db'].'-boletin';
 
 			if(!file_exists($path))

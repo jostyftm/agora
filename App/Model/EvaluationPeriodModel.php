@@ -3,7 +3,7 @@
 namespace App\Model;
 
 use App\Config\DataBase as DB;
-
+use App\Model\PeriodModel as Period;
 /**
 * 
 */
@@ -13,13 +13,17 @@ class EvaluationPeriodModel extends DB
 
 	private $_periods = array();
 
+	private $_period;
+
 
 	function __construct($db='')
 	{
 		if(!$db)
 			throw new \Exception("La clase ".get_class($this)." no encontro la base de datos", 1);
-		else
+		else{
 			parent::__construct($db);
+			$this->_period = new Period($db);
+		}
 	}
 
 	public function getPeriodWithOutEvaluating($id_group, $id_asignature)
@@ -213,6 +217,22 @@ class EvaluationPeriodModel extends DB
 		GROUP BY t_evaluacion.id_estudiante ORDER BY  Tav DESC , Promedio DESC ;";
 
 		return $this->getResultsFromQuery();
+	}
+
+	public function getAllPositions($id_group=''){
+		$periods = $this->_period->all()['data'];
+
+		$positions = array(
+			'periodos' => array()
+		);
+		foreach($periods as $key => $period):
+
+			if($period['peso'] != 0):
+				$positions['periodos'] = $this->getPositionGradeBook(($key+1), $id_group);
+			endif;
+
+		endforeach;
+		return $positions;
 	}
 
 	public function getPositionGradeBook($period='', $id_group=''){
