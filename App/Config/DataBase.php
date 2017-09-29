@@ -40,6 +40,7 @@ class DataBase
     private function openConnect()
     {
         $this->conexion = new \mysqli($this->host, $this->user, $this->password, $this->database);
+        // $this->conexion->set_charset("utf8");
         if($this->conexion->connect_errno)
         {
             $this->error = mysqli_error($this->conexion);

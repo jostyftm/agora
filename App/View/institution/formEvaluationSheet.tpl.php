@@ -18,7 +18,7 @@
 					<div class="panel-body">
 					    <form action="/pdf/testPdf" method="POST" id="formCreateSheets" enctype="application/x-www-form-urlencoded" target="_blank">
 					  		<div class="row">
-					  			<div class="col-md-offset-3 col-md-3">
+					  			<div class="col-md-offset-2 col-md-3">
 					  				<div class="form-group">
 					  					<label for="">Sedes</label>
 					  					<select class="form-control" id="selectSede" name="sede">
@@ -36,6 +36,17 @@
 					  						<option value="0" class="text-center"> - Seleccione un tipo de planilla - </option>
 					  						<option value="Attendance">Asistencia</option>
 					  						<option value="Evaluation">Evaluacion</option>
+					  					</select>
+					  				</div>
+					  			</div>
+					  			<div class="col-md-3">
+					  				<div class="form-group">
+					  					<label for="">Periodo</label>
+					  					<select class="form-control" name="period" id="period" disabled>
+					  						<option value="0" class="text-center"> - Seleccione un periodo - </option>
+					  						<?php foreach($periods as $period):?>
+					  							<option value="<?= $period['periodos']?>">Periodo <?= $period['periodos']?></option>
+					  						<?php endforeach;?>
 					  					</select>
 					  				</div>
 					  			</div>
@@ -144,6 +155,7 @@
 
 					$("#btnCreate").prop('disabled', false);
 					$("#orientation").prop('disabled', true);
+					$("#period").prop('disabled', true);
 
 				}else if(this.value == 'Evaluation'){
 
@@ -151,6 +163,7 @@
 
 					$("#btnCreate").prop('disabled', false);
 					$("#orientation").prop('disabled', false);
+					$("#period").prop('disabled', false);
 				}
 			});
 

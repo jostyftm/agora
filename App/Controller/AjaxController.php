@@ -140,5 +140,16 @@ class AjaxController
 					 $value['asignatura'])."</option>";	
 		}
 	}
+
+	public function getGroupBySedeAndGradeAction($sede_id, $grade_id, $workingDay, $db='')
+	{
+		$group_obj = new Group($db);
+		$groups = $group_obj->findBySedeAndGrade($sede_id, $grade_id, $workingDay)['data'];
+
+		foreach($groups as $key => $group)
+		{
+			echo "<option value='".$group['id_grupo']."'>".utf8_encode($group['nombre_grupo'])."</option>";	
+		}
+	}
 }
 ?>

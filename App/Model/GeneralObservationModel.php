@@ -33,7 +33,19 @@ class GeneralObservationModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
-	/*
+	/**
+	 *
+	*/
+	public function findByStudent($id_sudent, $id_group, $period)
+	{
+		$this->query = "SELECT observaciones
+						FROM {$this->table}
+						WHERE id_estudiante={$id_sudent} AND id_grupo={$id_group} AND id_periodo={$period}";
+
+		return $this->getResultsFromQuery();
+	}
+
+	/**
 	 *
 	*/
 	public function save($data=array())

@@ -18,7 +18,12 @@ class EvaluationSheetPDF extends FPDF
 
 	public $tipo = 'Planilla de evaluacion';
 	public $evaluation_parameters = array();
-	public $maxPeriod = 0;
+	public $low_valoration = array();
+	public $min_basic = array();
+	public $max_valoration = array();
+	public $maxPeriod = 1;
+	public $periods = array();
+	public $current_period = 1;
 	public $infoGroupAndAsig = array();
 	public $institution = array();
 
@@ -27,7 +32,7 @@ class EvaluationSheetPDF extends FPDF
 	private $_with_period = 6.5;
 	private $_with_C_H = 42; //Ancho de la celda donde estan los header (Desempeños)
 	private $_with_A_E = 9.5; //Ancho para la celda de AE Cambio
-	private $_width_VG_VRA = 8;
+	private $_width_VG_VRA = 8.5;
 	private $_width_mark = 267;
 	private $fontSizeHeader = 9;
 
@@ -62,7 +67,7 @@ class EvaluationSheetPDF extends FPDF
 	    
 	    
 	    // Título
-	    $this->Cell($this->_with_title, 6, $this->institution['nombre_inst'], 0, 0, 'C');
+	    $this->Cell($this->_with_title, 6, ($this->institution['nombre_inst']), 0, 0, 'C');
 	    
 
 	    // Movernos a la derecha
@@ -74,7 +79,7 @@ class EvaluationSheetPDF extends FPDF
 	    $this->SetFont('Arial','B',$this->fontSizeHeader);
 	    $this->Cell(90, 4, '', 0,0);
 	    // Título
-	    $this->Cell($this->_with_title,4, strtoupper($this->infoGroupAndAsig['sede']), 0, 0, 'C');
+	    $this->Cell($this->_with_title,4, strtoupper(($this->infoGroupAndAsig['sede'])), 0, 0, 'C');
 	    // Movernos a la derecha
 	    $this->Cell(0, 4, '', 0,0);
 	    // Salto de línea
@@ -108,8 +113,8 @@ class EvaluationSheetPDF extends FPDF
 	    // QUINTA LINEA
 	    // Movernos a la derecha
 	    $this->Cell($this->_with_cellSpace, 4, '', 0,0);
-	    $this->Cell($this->_with_gr, 4, substr('ASIGNATURA: '.$this->infoGroupAndAsig['asignatura'], 0,35), 0,0);
-	    // $this->Cell(65, 4, 'ASIGNATURA: '.$this->infoGroupAndAsig['asignatura'], 0, 0, 'L');
+	   	$this->Cell($this->_with_gr, 4, substr('ASIGNATURA: '.($this->infoGroupAndAsig['asignatura']), 0,35), 0,0);
+	    
 	    // Título
 	    $this->Cell($this->_with_DR,4, 'DOCENTE: '.
 					$this->infoGroupAndAsig['doc_primer_nomb']." ".
@@ -154,11 +159,6 @@ class EvaluationSheetPDF extends FPDF
 	    		if(count($this->evaluation_parameters) == 3 && $this->fieldExists("AEE")){
 	    			$this->_with_C_H = 55;
 		    		$this->_with_C_S = 88;
-	    		}
-				// Para los que tienen 4 desempeño y existen AEE
-	    		else if(count($this->evaluation_parameters) == 4 && $this->fieldExists("AEE")){
-	    			$this->_with_C_H = 43;
-		    		$this->_with_C_S = 69;
 	    		}
 
 	    	}
@@ -209,7 +209,7 @@ class EvaluationSheetPDF extends FPDF
 		foreach ($this->evaluation_parameters as $key => $value) {
 			
 			if(count($value['indicadores']) == 0)
-			{
+			{	
 				if($value['parametro'] != 'AEE')
             	{
 					for ($i=0; $i < 5; $i++) { 
@@ -219,10 +219,7 @@ class EvaluationSheetPDF extends FPDF
 			}
 			foreach ($value['indicadores'] as $keyInd => $valueInd) {
 
-				 if($value['parametro'] == 'AEE')
-            	{
-            		// $this->Cell( $this->_with_A_E , 4, $valueInd['abreviacion'], 1,0, 'C', true);	
-            	}else
+				if($value['parametro'] != 'AEE')
             	{
             		$this->Cell( $this->_with_C_H / count($value['indicadores']) , 4, substr($valueInd['abreviacion'], 0,3), 1,0, 'C', true); //Cambio $this->_with_C_H / 5	
             	}
@@ -248,19 +245,27 @@ class EvaluationSheetPDF extends FPDF
 				{
 					$this->Cell($this->_with_C_S, 4, '0'.($key+1).' '.
 						substr(
-							$value['alu_primer_ape'].' '.
-							$value['alu_segundo_ape'].' '.
-							$value['alu_primer_nom'].' '.
-							$value['alu_segundo_nom'], 0,37), 1,0, 'L', false);
+							(
+								$value['alu_primer_ape'].' '.
+								$value['alu_segundo_ape'].' '.
+								$value['alu_primer_nom'].' '.
+								$value['alu_segundo_nom']
+							)	
+						, 0,37)
+					, 1,0, 'L', false);
 				}
 				else
 				{
 					$this->Cell($this->_with_C_S, 4, ($key+1).' '.
 						substr(
-							$value['alu_primer_ape'].' '.
-							$value['alu_segundo_ape'].' '.
-							$value['alu_primer_nom'].' '.
-							$value['alu_segundo_nom'], 0,37), 1,0, 'L', false);
+							(
+								$value['alu_primer_ape'].' '.
+								$value['alu_segundo_ape'].' '.
+								$value['alu_primer_nom'].' '.
+								$value['alu_segundo_nom']
+							)	
+						, 0,37)
+					, 1,0, 'L', false);
 				}
 				
 				// Se imprime la celda de la novedad
@@ -270,50 +275,86 @@ class EvaluationSheetPDF extends FPDF
 				$this->showState($value['estatus']);
 
 				// Recorremos los periodos del estudiante
-				for ($i=0; $i < $this->maxPeriod; $i++) {
+				$this->showPeriodNote($value);
 
-					$nota = round($value['periodo'.($i+1)],1);
-					// Preguntamos si la nota es iguala 0
-					if($nota == NULL || $nota == 0)
-						$this->Cell($this->_with_period, 4, '', 1, 0, 'C', false);					 
-					else
-						if(strlen($nota) == 1)
-							$this->Cell($this->_with_period, 4, $nota.'.0', 1, 0, 'C', false);
-						else
-							$this->Cell($this->_with_period, 4, $nota, 1, 0, 'C', false);
+				// Mostrar indicadores y parametros de evaluación
+				$this->showIndicatorsCell();
+				
+				// Muestra la valoración acumulada(VG)
+				$this->showVG($value);
 
-				}
+				// Muestra la valoración minima de aprobación(VRA)
+				$this->showVRA($value);
 
-				foreach ($this->evaluation_parameters as $key => $value) {
-			
-					if(count($value['indicadores']) == 0)
-					{
-						if($value['parametro'] != 'AEE')
-		            	{
-							for ($i=0; $i < 5; $i++) { 
-								$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', false);
-							}
-						}
-					}
-					foreach ($value['indicadores'] as $keyInd => $valueInd) {
-						if($value['parametro'] == 'AEE')
-		            	{
-		            		$this->Cell( $this->_with_A_E , 4, '', 1,0, 'C', false);	
-		            	}else
-		            	{
-		            		$this->Cell( $this->_with_C_H / count($value['indicadores']) , 4, '', 1,0, 'C', false);	
-		            	}
-						
-					}
-				}
-
-				$this->Cell($this->_width_VG_VRA, 4, '', 1,0, 'C');
-        		$this->Cell($this->_width_VG_VRA, 4, '', 1,0, 'C');
+				// Campo para la valoración final
 				$this->Cell($this->_width_VG_VRA,4,'',1,0);
 
 				$this->Ln(4);
 			}
 		}
+
+		// Mostrar Significado de abreviaciones
+		$this->showAbbreviations();	
+	}
+
+	private function showPeriodNote($data = array())
+	{
+		foreach($this->periods as $key => $period) {
+
+			$nota = round($data['periodo'.$period['periodos']],1);
+			// Preguntamos si la nota es iguala 0
+			if($nota == NULL || $nota == 0 ||  $period['periodos'] > $this->current_period)
+				$this->Cell($this->_with_period, 4, '', 1, 0, 'C', false);					 
+			else
+				if(strlen($nota) == 1)
+					$this->Cell($this->_with_period, 4, $nota.'.0', 1, 0, 'C', false);
+				else
+					$this->Cell($this->_with_period, 4, $nota, 1, 0, 'C', false);
+
+		}
+	}
+
+	private function showIndicatorsCell()
+	{
+		foreach ($this->evaluation_parameters as $key => $value) {
+			
+			if(count($value['indicadores']) == 0)
+			{	
+				if($value['parametro'] != 'AEE')
+    			{
+					for ($i=0; $i < 5; $i++) { 
+						$this->Cell( $this->_with_C_H / 5 , 4, '', 1,0, 'C', false);
+					}
+				}else{
+					$this->Cell( $this->_with_A_E , 4, '', 1,0, 'C', false);
+				}
+			}
+			foreach ($value['indicadores'] as $keyInd => $valueInd) {
+				if($value['parametro'] != 'AEE')
+            	{
+            		$this->Cell( $this->_with_C_H / count($value['indicadores']) , 4, '', 1,0, 'C', false);	
+            	}else{
+					$this->Cell( $this->_with_A_E , 4, '', 1,0, 'C', false);
+				}
+				
+			}
+		}
+	}
+
+	private function showVG($data = array())
+	{	
+		
+		$vg = round($this->getVG($data), 1);
+
+		$this->Cell($this->_width_VG_VRA, 4, $vg, 1,0, 'C');
+	}
+
+
+	private function showVRA($data = array())
+	{
+		$vra = $this->getVRA($data);		
+
+		$this->Cell($this->_width_VG_VRA, 4, $vra, 1,0, 'C');
 	}
 
 	// 
@@ -347,6 +388,83 @@ class EvaluationSheetPDF extends FPDF
 		}
 
 		return false;
+
+	}
+
+	private function getVG($data=array())
+	{
+		$vg = 0;
+		foreach($this->periods as $key => $period):
+
+			if($period['periodos'] <= $this->current_period):
+
+				$nota = round($data['periodo'.($key+1)],1);
+				$vg += $nota * ($period['peso']/100);
+
+			endif;
+
+		endforeach;
+
+		return $vg;
+	}
+
+	private function getVRA($data=array())
+	{
+		$vra = '';
+		$empty_period = false;
+		// Periodos a evaluar
+		$P_E = count($this->periods) - ($this->current_period - 1);
+
+		// Minimo Báscico - Valoración
+		$min_basic = $this->min_basic['minimo'];
+
+		foreach($this->periods as $key => $period):
+			
+			if($this->current_period == 1 && $period['periodos'] == 1 ):
+
+				$vra = ($min_basic / $P_E) / ($period['peso'] / 100);
+
+				break;
+
+			elseif( $this->current_period == $period['periodos']):
+
+				// 
+				$previous_period_note = $data['periodo'.($this->current_period-1)];
+
+				// 
+				$vg_period_previous = round($this->getVG($data),1);
+
+				// 
+				$period_tobe_evaluated = (count($this->periods) - ($this->current_period - 1) );
+
+				if( $previous_period_note > 0 && $previous_period_note != '' ):
+					$vra = ( ($min_basic - $vg_period_previous) / $period_tobe_evaluated) / ($period['peso'] / 100);
+				endif;
+
+			endif;
+
+		endforeach;
+
+		if($vra > 0 || $vra != ''):
+			return round($vra,1);
+		else:
+			return $vra;
+		endif;	
+	}
+
+	private function showAbbreviations()
+	{
+		$this->SetFont('Arial','B',9);
+		$this->Cell(6,8,'VG:',0,0);
+		$this->SetFont('Arial','',9);
+		$this->Cell(33,8,'Valoracion Acumulada',0,0);
+
+		$this->Cell(3,8,'/',0,0);
+
+		$this->SetFont('Arial','B',9);
+		$this->Cell(8,8,'VRA:',0,0);
+		$this->SetFont('Arial','',9);
+		$this->Cell(55,8,utf8_decode('Valoracion Requerida de Aprobación'),0,0);
 
 	}
 

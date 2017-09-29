@@ -14,7 +14,10 @@ class GeneralPeriodReportPDF extends FPDF
 	public $infoStudent = array();
 	public $institution = array();
 	public $infoGroupAndAsig = array();
-	public $content = '';
+	public $content = array();
+	public $date = '';
+	public $period = 1;
+	public $options = array();
 
 	private $_h_c = 4;
 
@@ -79,15 +82,11 @@ class GeneralPeriodReportPDF extends FPDF
 	    // QUINTA LINEA
 	    // Movernos a la derecha
 	    $this->Cell(17, 4, '', 0,0);
-	    $this->Cell(80, 4, 'ESTUDIANTE: '.
-	    	$this->infoStudent['primer_ape_alu'].' '.
-	    	$this->infoStudent['segundo_ape_alu'].' '.
-	    	$this->infoStudent['primer_nom_alu'].' '.
-	    	$this->infoStudent['segundo_nom_alu'], 0, 0, 'L');
+	    $this->Cell(80, 4, $this->infoStudent, 0, 0, 'L');
 	    // Título
 	    // $this->Cell(120,4, 'DOCENTE: ', 0, 0, 'C');
 	    // Movernos a la derecha
-	    $this->Cell(0, 4, 'FECHA: '.$this->date, 0,0, 'L');
+	    $this->Cell(0, 4, 'FECHA: '.($this->date == '') ? date("Y-m-d") : $this->date, 0,0, 'L');
 	    // Salto de línea
 	    $this->Ln(8);
 
@@ -96,7 +95,7 @@ class GeneralPeriodReportPDF extends FPDF
 
 	// SubHeader
 	private function subHeader(){
-		$this->Cell(0, $this->_h_c, utf8_decode('INFORME GENERAL DEL PERIODO 1 - AÑO LECTIVO ').date('Y'), 1,0, 'L'); 
+		$this->Cell(0, $this->_h_c, utf8_decode('INFORME GENERAL DEL PERIODO '.$this->period.' - AÑO LECTIVO ').date('Y'), 1,0, 'L'); 
 		$this->Ln($this->_h_c);
 	}
 
@@ -110,20 +109,124 @@ class GeneralPeriodReportPDF extends FPDF
 		$this->createReport();
 
 		// 
-		$this->lastConfig();
+		$this->showTeacherFirm();
 
+		// 
+		if(isset($this->options['doubleFace'])):
+			$this->showDoubleFace();
+		endif;
 	}
 
 	public function createReport(){
 		$this->SetFont('Arial','',9);
-		$this->MultiCell(0, $this->_h_c, strip_tags($this->content), 1, 'J');
+
+		$border = 'LR';
+		foreach($this->content as $key => $p):
+
+			if(count($this->content) == ($key+1) )
+				$border = 'LRB';
+
+			$this->determineCell($this->hideTilde($p), $border);
+
+		endforeach;
+	}
+
+	/**
+	*
+	*
+	*/
+	private function determineCell($data, $border)
+	{	
+		$this->SetFont('Arial','',8);
+
+		if(strlen($data) > 100)
+			$this->MultiCell(0, $this->_h_c, strip_tags($data), $border, 'L');
+		else
+		{
+			$this->Cell(0, $this->_h_c, strip_tags($data), $border,0, 'L');
+			$this->Ln(4);
+		}
+	}
+
+	/**
+	*
+	*
+	*/
+	private function hideTilde($text)
+	{	
+		$content = $text;
+		$decoded = false;
+
+		if(strstr($content, '&eacute;')){
+			$content = str_replace('&eacute;', 'é', $content);
+			$decoded = true;
+		}
+
+		if(strstr($content, '&aacute;')){
+			$content = str_replace('&aacute;', 'á', $content);
+			$decoded = true;
+		}
+
+		if(strstr($content, '&iacute;')){
+			$content = str_replace('&iacute;', 'í', $content);
+			$decoded = true;
+		}
+
+		if(strstr($content, '&oacute;')){
+			$content = str_replace('&oacute;', 'ó', $content);
+			$decoded = true;
+		}
+
+		if(strstr($content, '&uacute;')){
+			$content = str_replace('&uacute;', 'ú', $content);
+			$decoded = true;
+		}
+
+		if(strstr($content, '&ntilde;')){
+			$content = str_replace('&ntilde;', 'ñ', $content);
+			$decoded = true;
+		}
+
+		if(strstr($content, '&nbsp;')){
+			$content = str_replace('&nbsp;', ' ', $content);
+			$decoded = true;
+		}
+		
+		return ($decoded) ? utf8_decode($content) : $content;
 	}
 
 	// 
-	private function lastConfig()
-	{
+	private function showTeacherFirm()
+	{	
+		$this->Ln(10);
 
+
+		$this->SetFont('Arial','B',8);
+		// DIRECTOR DE GRUPO
+	    $this->Cell(0,4,
+    	$this->infoGroupAndAsig['doc_primer_nomb']." ".
+    	$this->infoGroupAndAsig['doc_segundo_nomb']." ".
+    	$this->infoGroupAndAsig['doc_primer_ape']." ".
+    	$this->infoGroupAndAsig['doc_segundo_ape'], 0, 0, 'L');
+
+	    $this->Ln();
+
+	    $this->SetFont('Arial','',8);
+	    $this->Cell(0,4,"DIRECTOR DE GRUPO", 0,0);
 	}
+
+
+	/**
+	*
+	*
+	*/
+	private function showDoubleFace()
+	{
+		if($this->PageNo()% 2 != 0 && $this->PageNo() >= 1):
+			$this->AddPage();
+		endif;
+	}
+	
 	// Pie de página
 	function Footer(){
 	    // Posición: a 1,5 cm del final

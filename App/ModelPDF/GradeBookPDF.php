@@ -149,8 +149,9 @@ class GradeBookPDF extends FPDF
 	}
 
 	private function config()
-	{
-		if($this->infoGroupAndAsig['id_grado'] == 4 && $this->institution['cod_dane'] == 176109003183)
+	{	
+		//  && $this->institution['cod_dane'] == 176109003183
+		if($this->infoGroupAndAsig['id_grado'] == 4 )
 			$this->_prefixValoration = 'valoracion_trans';
 	}
 
@@ -344,7 +345,7 @@ class GradeBookPDF extends FPDF
 			$valoracion = '';
 
 			if($data_asignature['id_asignatura'] == $valueP['id_asignatura']):
-				$notaDesem = $data_asignature[$valueP['posicion']];
+				$notaDesem = $data_asignature[$valueP['posicion'].'_1'];
 
 				foreach ($this->valoration as $keyV => $valueV) {
 								
@@ -453,6 +454,16 @@ class GradeBookPDF extends FPDF
 					$this->Cell(8, $this->_h_c, '', 'TBR',0, 'C', true);
 				}
 
+				foreach ($this->periods as $keyP => $valueP) 
+				{
+					if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
+					{	
+						$this->Cell(6, $this->_h_c, '', 1,0, 'C', true);
+						$this->Cell(8, $this->_h_c, '', 1,0, 'C', true);
+						$this->Cell(8, $this->_h_c, '', 1,0, 'C', true);
+					}
+				}
+
 				$this->Ln($this->_h_c);
 
 				// Asignaturas
@@ -499,7 +510,39 @@ class GradeBookPDF extends FPDF
 			}
 		}
 
-		$this->Cell(90, $this->_h_c, utf8_decode('PESTO EN EL GRUPO'), 1, 0, 'C');
+		$this->SetFont('Arial','B',8);
+		$this->Cell(90, $this->_h_c, utf8_decode('PROMEDIO GENERAL DEL ESTUDIANTE:'), 1, 0, 'R');
+		$this->Cell(6, $this->_h_c, '', 1,0, 'C');
+
+
+		foreach($this->positions as $position):
+			foreach ($this->periods as $key => $value):
+		
+				if($value['peso'] != 0):
+					if($this->infoStudent['idstudents'] == $position['id_student'] && $value['periodos'] == $position['period']):
+
+						$this->Cell(6, $this->_h_c, '', 1,0, 'C');
+						$this->Cell(8, $this->_h_c, $position['pgg'], 1,0, 'C');
+						$this->Cell(8, $this->_h_c, '', 1, 0,'C');
+					endif;
+				endif;
+
+			endforeach;
+			
+		endforeach;
+
+		foreach ($this->periods as $keyP => $valueP) 
+		{
+			if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
+			{	
+				$this->Cell(6, $this->_h_c, '', 1,0, 'C');
+				$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+				$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+			}
+		}
+
+		$this->Ln();
+		$this->Cell(90, $this->_h_c, utf8_decode('PUESTO EN EL GRUPO:'), 1, 0, 'R');
 		$this->Cell(6, $this->_h_c, '', 1,0, 'C');
 		
 		
@@ -516,8 +559,16 @@ class GradeBookPDF extends FPDF
 				endif;
 
 				endforeach;
-			
 		endforeach;
+		foreach ($this->periods as $keyP => $valueP) 
+		{
+			if($valueP['peso'] !=0 && $valueP['periodos'] != 1)
+			{	
+				$this->Cell(6, $this->_h_c, '', 1,0, 'C');
+				$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+				$this->Cell(8, $this->_h_c, '', 1,0, 'C');
+			}
+		}
 	}
 
 	private function createGeneralObservation()
@@ -557,7 +608,7 @@ class GradeBookPDF extends FPDF
 
 		if($this->ImpDobleCara)
 		{	
-			if($this->PageNo()% 2 != 0 && $this->PageNo() > 2)
+			if($this->PageNo()% 2 != 0 && $this->PageNo() >= 1)
 				$this->AddPage();
 		}
 	}

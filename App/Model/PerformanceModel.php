@@ -52,15 +52,98 @@ class PerformanceModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
-	public function getPerformanceByGroup($id_group, $period)
+	public function getPerformanceByGroup($id_group)
 	{
-		$this->query = "SELECT DISTINCT d.*, dp.posicion, dp.id_grupo
+		$this->query = "SELECT DISTINCT d.*, dp.posicion, dp.id_grupo, dp.periodo, dp.id_asign AS id_asignatura
 						FROM rel_desemp_posicion dp
 						INNER JOIN desempeno d ON dp.cod_desemp=d.codigo
-						WHERE dp.id_grupo={$id_group} AND d.periodos ={$period}
-						ORDER BY d.codigo";
+						WHERE dp.id_grupo={$id_group}
+						ORDER BY dp.posicion";
 
 		return $this->getResultsFromQuery();
+	}
+
+	/**
+
+	**/ 
+
+	public function getEvaluationParametersAndIndicators()
+	{
+		$response = array();
+
+		$eParameters = $this->getEvaluationParameters();
+
+		if($eParameters['state']):
+
+			foreach($eParameters['data'] as $key => $parameter):
+
+				array_push(
+					$response, 
+					array(
+						'id_parametro'	=>	$parameter['id_parametro_evaluacion'],
+						'parametro'		=>	utf8_encode(
+							$parameter['parametro']
+						),
+						'prefix'		=>	$parameter['prefix'],
+						'peso'			=>	$parameter['peso'],
+						'indicadores'	=>	$this->resolveIndicators(
+							$parameter['id_parametro_evaluacion']
+						)
+					)
+				);
+			endforeach;
+
+		endif;
+
+		return $response;
+	}
+
+	/**
+	*
+	*
+	*/
+	private function resolveIndicators($id_parameter)
+	{
+		$response = array();
+
+		$indicators = $this->getPerformanceIndicators($id_parameter);
+		
+		if($indicators['state']):
+
+			foreach($indicators['data'] as $key => $indicator):
+
+				$percentage = (isset($indicator['porcentaje'])) ? $indicator['porcentaje'] : 0 ;
+
+				if($indicator['id_parametro_evaluacion'] == $id_parameter):
+
+					array_push(
+						$response, 
+						array(
+							'id'	=>	$indicator['id_indicadores'],
+							'indicator'	=>	utf8_encode($indicator['indicador']),
+							'abbreviation'	=>	$indicator['abreviacion'],
+							'percentage'	=>	$percentage
+						)
+					);
+				endif;
+
+			endforeach;
+		else:
+
+			for($i=0; $i < 5; $i++){
+				array_push(
+					$response, 
+					array(
+						'id'=>0,
+						'indicator'=>'',
+						'abbreviation'=>'',
+						'percentage'=> 0
+					)
+				);
+			}
+		endif;
+
+		return $response;
 	}
 }
 ?>

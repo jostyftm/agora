@@ -15,5 +15,7 @@
             "Lib\\": "Lib/"
         }
     },
-    "require": {}
+    "require": {
+        "phpoffice/phpexcel": "1.8.1"
+    }
 }

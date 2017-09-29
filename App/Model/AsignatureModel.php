@@ -10,6 +10,7 @@ use App\Config\DataBase as DB;
 class AsignatureModel extends DB
 {
 	private $table = 't_asignaturas';
+	private $table_observation = 'observacion_asignatura';
 	
 	function __construct($db='')
 	{	
@@ -25,5 +26,18 @@ class AsignatureModel extends DB
 		return $this->getResultsFromQuery();
 	}
 
+	/**
+	*
+	*
+	*
+	*/
+	public function getObservationByStudent($id_student, $id_asignature, $period)
+	{
+		$this->query = "SELECT *
+						FROM {$this->table_observation}
+						WHERE id_estudiante={$id_student} AND id_asignatura={$id_asignature} AND periodo={$period}";
+
+		return $this->getResultsFromQuery();
+	}
 }
 ?>

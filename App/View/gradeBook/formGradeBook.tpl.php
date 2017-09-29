@@ -16,12 +16,12 @@
 						<h3 class="panel-title">Boletines de notas</h3>
 					</div>
 					<div class="panel-body">
-						<form action="/pdf/generateGradeBookByStudent" method="POST" enctype="application/x-www-form-urlencoded" target="_blank">
+						<form action="/pdf/gradeBook" method="POST" enctype="application/x-www-form-urlencoded" target="_blank">
 					    	<div class="row">
 					    		<div class="col-md-4">
 					    			<div class="form-group">
 					    				<label for="">Sedes</label>
-							    		<select name="sede" id="selectSede" class="form-control">
+							    		<select name="sede" id="selectSede" class="form-control" required>
 							    			<option value="">- Selecciona una sede -</option>
 							    			<?php
 							    				foreach ($sedes as $sede) {
@@ -31,20 +31,31 @@
 							    		</select>
 							    	</div>
 					    		</div>
-					    		<div class="col-md-4">
+					    		<div class="col-md-3">
 					    			<div class="form-group">
 					    				<label for="">Grupos</label>
-					    				<select name="grupo" id="selectGrupo" class="form-control">
+					    				<select name="grupo" id="selectGrupo" class="form-control" required>
 							    			<?php
 							    				
 							    			?>
 							    		</select>
 					    			</div>
 					    		</div>
-					    		<div class="col-md-4">
+					    		<div class="col-md-2">
+					    			<div class="form-group">
+					    				<label for="">Periodo</label>
+					    				<select name="period" class="form-control" required>
+					    					<option value="">- periodo -</option>
+					    					<?php foreach($periods as $key => $period):?>
+												<option value="<?= $period['periodos']?>"><?= $period['periodos']?></option>
+					    					<?php endforeach;?>
+					    				</select>
+					    			</div>
+					    		</div>
+					    		<div class="col-md-3">
 					    			<div class="form-group">
 					    				<label for="">Fecha</label>
-					    				<input type="date" class="form-control" name="fecha">
+					    				<input type="date" name="fecha" class="form-control">
 					    			</div>
 					    		</div>
 					    	</div>
@@ -74,28 +85,6 @@
 							    	</div>
 					    		</div>
 					    	</div>
-					    	</div>
-					    	<div class="row">
-					    		<div class="col-md-12 text-center">
-					    			<div class="form-group text-center">
-					    				<label for="">Periodo</label>
-					    			</div>
-					    			<div class="form-group">
-					    				<label class="radio-inline">
-									     	<input type="checkbox" name="periodo[]" value="eval_1_per"> Periodo 1
-									    </label>
-									    <label class="radio-inline">
-									    	<input type="checkbox" name="periodo[]" value="eval_2_per"> Periodo 2
-									    </label>
-									    <label class="radio-inline">
-									    	<input type="checkbox" name="periodo[]" value="eval_3_per"> Periodo 3
-									    </label>
-									    <label class="radio-inline">
-									    	<input type="checkbox" name="periodo[]" value="eval_4_per"> Periodo 4
-									    </label>
-					    			</div>
-					    		</div>
-					    	</div>
 					    	<hr>
 					    	<div class="row">
 					    		<div class="col-md-12 text-center">
@@ -108,30 +97,39 @@
 					    			<div id="configGradeBook" class="collapse">
 					    				<div class="form-group">
 										    <label class="radio-inline">
-										    	<input type="checkbox" name="MosDoc" value="MosDoc"> Mostrar Docente
+										    	<input type="checkbox" name="showTeacher"> Mostrar Docente
 										    </label>
 											<label class="radio-inline">
-										     	<input type="checkbox" name="escalaVAlorativa"> Escala Valorativa
+										     	<input type="checkbox" name="valorationScale"> Escala Valorativa
 										    </label>
 										    <label class="radio-inline">
-										     	<input type="checkbox" name="MosDesem"> Mostra Desempeños
+										     	<input type="checkbox" name="showPerformance"> Mostra Desempeños
 										    </label>
 										    <label class="radio-inline">
 										     	<input type="checkbox" name="areasDisabled"> Desactivar Areas
 										    </label>
 										    <label class="radio-inline">
-										     	<input type="checkbox" name="debleCara"> Doble Cara
+										     	<input type="checkbox" name="doubleFace"> Doble Cara
 										    </label>
 										    <label class="radio-inline">
-										     	<input type="checkbox" name="reportDisable"> Informe general del periodo
+										     	<input type="checkbox" name="generalReportPeriod"> Informe general del periodo
 										    </label>
 						    			</div>
 						    			<div class="form-group">
 						    				<label class="radio-inline">
-										     	<input type="checkbox" name="periodFace"> Imprimir caritas
+										     	<input type="checkbox" name="showFaces"> Imprimir caritas
 										    </label>
 										    <label class="radio-inline">
 										     	<input type="checkbox" name="CombinedEvaluation" checked> Valoraciones Acomuladas
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="NumberValoration" checked> Valoración Numérica
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="performanceRating" checked> Clasificar Desempeños
+										    </label>
+										    <label class="radio-inline">
+										     	<input type="checkbox" name="tableDetail" checked> Cuadro Detallado
 										    </label>
 						    			</div>
 					    			</div>
@@ -198,9 +196,9 @@
    			$('#selectStudent').multiselect({
 				search: {
 				 
-				left: '<input type="text" name="q" class="form-control" placeholder="Buscar..." style="margin-bottom:5px;"/>',
+				left: '<input type="text" name="ql" class="form-control" placeholder="Buscar..." style="margin-bottom:5px;"/>',
 				 
-				right: '<input type="text" name="q" class="form-control" placeholder="Buscar..." style="margin-bottom:5px;"/>',
+				right: '<input type="text" name="qr" class="form-control" placeholder="Buscar..." style="margin-bottom:5px;"/>',
 				 
 				}
 			});

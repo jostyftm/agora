@@ -2,11 +2,15 @@
 namespace App\Controller;
 
 use App\Model\SheetModel as Sheet;
+use App\Model\GroupModel as Group;
 use App\Model\PeriodModel as Period;
 use App\Model\TeacherModel as Teacher;
+use App\Model\ValorationModel as Valoration;
 use App\Model\PerformanceModel as Performance;
 use App\Model\InstitutionModel as Institution;
 use App\Model\EvaluationPeriodModel as Evaluation;
+
+use App\Office\Excel as Excel;
 /**
 * 
 */
@@ -78,9 +82,11 @@ class SheetController
 			$period = new Period($db);
 			$teacher = new Teacher($db);	
 			$performance = new Performance($db);
+			$institution = new Institution($db);
+			$valoration = new Valoration($db);
 
 			// Creamos el directorio
-			$path = './'.time().$db.'-planillaEvaluacion/';
+			$path = 'pdf/'.time().$db.'-planillaEvaluacion/';
 
 			if(!file_exists($path))
 			{	
@@ -88,7 +94,13 @@ class SheetController
 			}
 
 			// Obtenemos la cantidad de periodos
-			$periods = count($period->all()['data']);
+			$periods = $period->all()['data'];
+			$current_period = $_POST['period'];
+
+			//  Obtenemos las valoraciones
+			$low_valoration = $valoration->find('Bajo')['data'][0];
+			$min_basic = $valoration->find('Basico')['data'][0];
+			$max_valoration = $valoration->find('Superior')['data'][0];
 
 			// OBtenemos los parametros de evaluacion
 			$Resp_eP = $performance->getEvaluationParameters()['data'];
@@ -109,8 +121,11 @@ class SheetController
 
 			// Cargamos las opciones para el pdf
 			$options = array(
-				// 'infoIns'			=> $this->_institution->getInfo()['data'][0],
+				'infoIns'			=>  $institution->getInfo()['data'][0],
 				'e_parameters'		=>	$evaluation_parameters,
+				'low_valoration'	=>	$low_valoration,
+				'min_basic'			=>	$min_basic,
+				'max_valoration'	=>	$max_valoration,
 				'orientation'		=>	$_POST['orientation'],
 				'papper'			=>	$_POST['papper']
 			);
@@ -119,7 +134,8 @@ class SheetController
 			$sheet->setPath($path);
 			// Asignamos las opciones
 			$sheet->setOptions($options);
-
+			// 
+			$sheet->current_period = $current_period;
 			// 
 			foreach($_POST['teacher'] as $key => $id_teacher):
 
@@ -142,99 +158,41 @@ class SheetController
 	}
 
 
-	// /**
-	// * @author
-	// * @param
-	// * @return
-	// */
-	// public function attendanceAction()
-	// {
-	// 	// Preguntamos si el array POST NO esta vacio
-	// 	if(!empty($_POST) && isset($_POST['groups'])):
+	public function groupAction($db='')
+	{
 
-	// 		$path = './'.time().'/';
+		$group_obj = new Group($db);
+		$excel = new Excel();
 
-	// 		$this->_sheet->setPath($path);
+		$headers = ["ID", "Apellidos", "Nombres", "Grupo","Jornada"];
 
-	// 		if(!file_exists($path))
-	// 			mkdir($path);
+		if(isset($_POST['btn_file']) && strstr(strtolower($_POST['btn_file']), 'excel')):
 
-	// 		foreach($_POST['groups'] as $key => $group):
-				
-	// 			$id_asignature = split('-', $group)[0];
-	// 			$id_group = split('-', $group)[1];
+			foreach($_POST['groups'] as $key => $group_id):
 
-	// 			$this->_sheet->studentAttendanceSheet($id_asignature, $id_group, 'studentAttendance');
-	// 		endforeach;
+				$group = $group_obj->getClassRoomList($group_id)['data'];
 
-	// 		// 
-	// 		$this->_sheet->merge('l');
-	// 	else:
+				// print_r($group); echo "<br /><br />";
+				// exit();
 
-	// 		echo "Vacio";
-	// 	endif;
-	// }
+				$excel->setData($key, $headers, $group);
 
-	/**
-	*
-	*
-	*/
-	// public function evaluationAction()
-	// {
-	// 	if(!empty($_POST) && isset($_POST['groups'])):
+			endforeach;
 
-	// 		// Creamos el directorio
-	// 		$path = './'.time().'/';
+		elseif(isset($_POST['btn_file']) && strstr(strtolower($_POST['btn_file']), 'pdf')):
 
-	// 		if(!file_exists($path))
-	// 		{	
-	// 			mkdir($path);
-	// 		}
+			echo "PDF";
 
-	// 		// OBtenemos los parametros de evaluacion
-	// 		$Resp_eP = $this->_performance->getEvaluationParameters()['data'];
-	// 		// 
-	// 		$evaluation_parameters = array();
-			
-	// 		// Recorremos cada parametro de evaluacion y creamos un nuevo array
-	// 		foreach ($Resp_eP as $key => $value) 
-	// 		{
-	// 			array_push($evaluation_parameters, 
-	// 				array(
-	// 					'id_parametro' => $value['id_parametro_evaluacion'],
-	// 					'parametro' => $value['parametro'],
-	// 					'indicadores' => $this->_performance->getPerformanceIndicators($value['id_parametro_evaluacion'])['data']
-	// 				)
-	// 			);
-	// 		}
+		endif;
 
-	// 		// Cargamos las opciones para el pdf
-	// 		$options = array(
-	// 			'infoIns'			=> $this->_institution->getInfo()['data'][0],
-	// 			'e_parameters'		=>	$evaluation_parameters,
-	// 			'orientation'		=>	$_POST['orientation'],
-	// 			'papper'			=>	$_POST['papper']
-	// 		);
+		$excel->donwload();
+	}
 
-	// 		// Asignamos el directorio
-	// 		$this->_sheet->setPath($path);
-	// 		// Asignamos las opciones
-	// 		$this->_sheet->setOptions($options);
-
-	// 		// Recorremos los grupos y las asignaturas recibidos por POST
-	// 		foreach ($_POST['groups'] as $key => $group) {
-				
-	// 			$id_asignature = split('-', $group)[0];
-	// 			$id_group = split('-', $group)[1];
-
-	// 			$this->_sheet->evaluactionSheet($_POST['period'], $id_asignature, $id_group);
-	// 		}
-
-	// 		// 
-	// 		$this->_sheet->merge($_POST['orientation']);
-	// 	else:
-
-	// 	endif;
-	// }
+	public function excelAction()
+	{
+		$excel = new Excel();
+		$excel->downloadExcel();
+		echo "string";
+	}
 }
 ?>
